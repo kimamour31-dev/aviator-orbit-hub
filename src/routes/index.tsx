@@ -1,23 +1,66 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { BetConsole } from "@/components/aviator/BetConsole";
+import { BetsPanel } from "@/components/aviator/BetsPanel";
+import { FlightBoard } from "@/components/aviator/FlightBoard";
+import { Header } from "@/components/aviator/Header";
+import { HistoryStrip } from "@/components/aviator/HistoryStrip";
+import { useAviatorGame } from "@/hooks/use-aviator-game";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "OMUH 360 Aviator — Crash Game Demo" },
+      {
+        name: "description",
+        content: "Play the OMUH 360 Aviator crash game for free: bet, watch the plane climb and cash out before it flies away.",
+      },
+      { property: "og:title", content: "OMUH 360 Aviator — Crash Game Demo" },
+      {
+        property: "og:description",
+        content: "Bet, watch the multiplier climb and cash out before the plane flies away. Free demo with virtual credits.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const game = useAviatorGame();
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-background">
+      <Header balance={game.balance} onReset={game.resetCredits} />
+      <main className="mx-auto max-w-[1400px] space-y-3 px-3 py-3 sm:px-5">
+        <HistoryStrip history={game.history} />
+        <div className="grid gap-3 lg:grid-cols-[320px_1fr]">
+          <div className="order-2 h-[520px] lg:order-1 lg:h-auto">
+            <BetsPanel phase={game.phase} simBets={game.simBets} myBets={game.myBets} topWins={game.topWins} />
+          </div>
+          <div className="order-1 space-y-3 lg:order-2">
+            <FlightBoard phase={game.phase} elapsed={game.elapsed} multiplier={game.multiplier} round={game.round} />
+            <div className="grid gap-3 md:grid-cols-2">
+              {([0, 1] as const).map((i) => (
+                <BetConsole
+                  key={i}
+                  index={i}
+                  slot={game.slots[i]}
+                  phase={game.phase}
+                  multiplier={game.multiplier}
+                  onPlace={() => game.placeBet(i)}
+                  onCancel={() => game.cancelBet(i)}
+                  onCashOut={() => game.cashOut(i)}
+                  onChange={(p) => game.updateSlot(i, p)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        <p className="pb-4 text-center text-xs text-muted-foreground">
+          Free-to-play demo with virtual credits. No real money is deposited, wagered or paid out.
+        </p>
+      </main>
     </div>
   );
 }
