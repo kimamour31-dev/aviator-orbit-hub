@@ -4,7 +4,10 @@ import { BetsPanel } from "@/components/aviator/BetsPanel";
 import { FlightBoard } from "@/components/aviator/FlightBoard";
 import { Header } from "@/components/aviator/Header";
 import { HistoryStrip } from "@/components/aviator/HistoryStrip";
-import { useAviatorGame } from "@/hooks/use-aviator-game";
+import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useAviatorGame, type GameMode } from "@/hooks/use-aviator-game";
+import { useSession } from "@/hooks/use-session";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,11 +30,34 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const game = useAviatorGame();
+  const session = useSession();
+  const navigate = useNavigate();
+  const [modeChoice, setModeChoice] = useState<GameMode>("demo");
+  const mode: GameMode = modeChoice === "real" && session.user ? "real" : "demo";
+  const game = useAviatorGame(mode, session.profile?.balance ?? null);
+
+  const changeMode = (m: GameMode) => {
+    if (m === "real" && !session.user) {
+      void navigate({ to: "/auth" });
+      return;
+    }
+    setModeChoice(m);
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      <Header balance={game.balance} onReset={game.resetCredits} />
+      <Header
+        balance={game.balance}
+        onReset={game.resetCredits}
+        mode={mode}
+        onModeChange={changeMode}
+        signedIn={Boolean(session.user)}
+        isAdmin={session.isAdmin}
+        onSignOut={() => {
+          setModeChoice("demo");
+          void session.signOut();
+        }}
+      />
       <main className="mx-auto max-w-[1400px] space-y-3 px-3 py-3 sm:px-5">
         <HistoryStrip history={game.history} />
         <div className="grid gap-3 lg:grid-cols-[320px_1fr]">
@@ -58,7 +84,9 @@ function Index() {
           </div>
         </div>
         <p className="pb-4 text-center text-xs text-muted-foreground">
-          Free-to-play demo with virtual credits. No real money is deposited, wagered or paid out.
+          {mode === "real"
+            ? "Real mode · account balance. Deposits and withdrawals are not live yet — balances are added by the operator."
+            : "Demo mode with free virtual credits. Switch to Real to play with your account balance."}
         </p>
       </main>
     </div>
