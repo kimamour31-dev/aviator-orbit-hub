@@ -94,7 +94,7 @@ export function useAviatorGame() {
     slots: [newSlot(1000), newSlot(500)],
     history: seedHistory(),
     myBets: [],
-    simBets: makeSimBets(),
+    simBets: [],
     topWins: [],
   });
   const [, setTick] = useState(0);
@@ -115,6 +115,7 @@ export function useAviatorGame() {
     } catch {
       /* ignore */
     }
+    g.current.simBets = makeSimBets();
     g.current.phaseStart = performance.now();
     setHydrated(true);
     render();
