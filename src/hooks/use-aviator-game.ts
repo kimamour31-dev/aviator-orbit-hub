@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   CRASHED_MS,
   STARTING_BALANCE,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/aviator";
 
 export type Phase = "waiting" | "flying" | "crashed";
+export type GameMode = "demo" | "real";
 export type SlotStatus = "none" | "queued" | "active";
 
 export type Slot = {
@@ -81,9 +83,16 @@ type GameState = {
   myBets: MyBet[];
   simBets: SimBet[];
   topWins: MyBet[];
+  realBalance: number;
+  realRoundId: string | null;
+  realPending: boolean;
+  cashing: [boolean, boolean];
 };
 
-export function useAviatorGame() {
+type RealBetRow = { id: string; slot: number; status: string; cashed_at: number | null; payout: number; stake: number };
+
+export function useAviatorGame(mode: GameMode = "demo", realBalance: number | null = null) {
+  const modeRef = useRef<GameMode>(mode);
   const g = useRef<GameState>({
     phase: "waiting",
     phaseStart: 0,
@@ -96,11 +105,42 @@ export function useAviatorGame() {
     myBets: [],
     simBets: [],
     topWins: [],
+    realBalance: 0,
+    realRoundId: null,
+    realPending: false,
+    cashing: [false, false],
   });
   const [, setTick] = useState(0);
   const [now, setNow] = useState(0);
   const [hydrated, setHydrated] = useState(false);
   const render = useCallback(() => setTick((t) => (t + 1) % 1_000_000), []);
+
+  // Keep real balance in sync with the account
+  useEffect(() => {
+    if (realBalance !== null) {
+      g.current.realBalance = realBalance;
+      render();
+    }
+  }, [realBalance, render]);
+
+  // Switching mode clears unplayed bets and refunds them to the right wallet
+  useEffect(() => {
+    if (modeRef.current === mode) return;
+    const s = g.current;
+    s.slots.forEach((slot) => {
+      if (slot.status === "queued") {
+        if (modeRef.current === "demo") s.balance += slot.stake;
+        else s.realBalance += slot.stake;
+      }
+      if (slot.status !== "active") {
+        slot.status = "none";
+        slot.stake = 0;
+      }
+      slot.autoBet = false;
+    });
+    modeRef.current = mode;
+    render();
+  }, [mode, render]);
 
   // Load saved demo wallet
   useEffect(() => {
@@ -143,12 +183,14 @@ export function useAviatorGame() {
       const s = g.current;
       const slot = s.slots[i];
       if (slot.status !== "none") return false;
-      const check = validateBet(slot.amount, s.balance);
+      const real = modeRef.current === "real";
+      const check = validateBet(slot.amount, real ? s.realBalance : s.balance);
       if (!check.ok) {
-        if (!silent) toast.error(check.reason);
+        if (!silent) toast.error(real ? check.reason.replace("demo credits", "balance") : check.reason);
         return false;
       }
-      s.balance -= slot.amount;
+      if (real) s.realBalance -= slot.amount;
+      else s.balance -= slot.amount;
       slot.stake = slot.amount;
       slot.status = "queued";
       persist();
@@ -163,7 +205,8 @@ export function useAviatorGame() {
       const s = g.current;
       const slot = s.slots[i];
       if (slot.status !== "queued") return;
-      s.balance += slot.stake;
+      if (modeRef.current === "real") s.realBalance += slot.stake;
+      else s.balance += slot.stake;
       slot.stake = 0;
       slot.status = "none";
       persist();
@@ -177,6 +220,32 @@ export function useAviatorGame() {
       const s = g.current;
       const slot = s.slots[i];
       if (slot.status !== "active" || s.phase !== "flying") return;
+      if (modeRef.current === "real") {
+        if (!s.realRoundId || s.cashing[i]) return;
+        s.cashing[i] = true;
+        const roundId = s.realRoundId;
+        const round = s.round;
+        const stake = slot.stake;
+        void supabase.rpc("cash_out_real", { _round_id: roundId, _slot: i }).then(({ data, error }) => {
+          s.cashing[i] = false;
+          const res = data as { ok: boolean; reason?: string; multiplier?: number; payout?: number; balance?: number } | null;
+          if (error || !res?.ok) {
+            toast.error(error?.message ?? res?.reason ?? "Cash out failed");
+            return;
+          }
+          const m = Number(res.multiplier);
+          const win = Number(res.payout);
+          s.realBalance = Number(res.balance);
+          recordBet({ id: `${round}-${i}`, round, stake, cashedAt: m, win, time: Date.now() });
+          toast.success(`Cashed out at ${formatMult(m)}`, { description: `You won ${formatTsh(win)}` });
+          if (slot.status === "active") {
+            slot.status = "none";
+            slot.stake = 0;
+          }
+          render();
+        });
+        return;
+      }
       const m = at ?? s.multiplier;
       const win = payout(slot.stake, m);
       s.balance += win;
@@ -206,6 +275,77 @@ export function useAviatorGame() {
     toast.success(`Demo credits reset to ${formatTsh(STARTING_BALANCE)}`);
   }, [persist, render]);
 
+  // Real mode: the server decides the crash point; the client only learns it once the plane flies away.
+  const startRealRound = useCallback(() => {
+    const s = g.current;
+    const [a, b] = s.slots;
+    s.realPending = true;
+    s.crashPoint = Number.POSITIVE_INFINITY;
+    const stake = (sl: Slot) => (sl.status === "active" ? sl.stake : 0);
+    const auto = (sl: Slot) => (sl.status === "active" && sl.autoCashout ? sl.autoCashoutAt : null);
+    void supabase
+      .rpc("start_real_round", {
+        _stake1: stake(a),
+        _auto1: auto(a) as number,
+        _stake2: stake(b),
+        _auto2: auto(b) as number,
+      })
+      .then(({ data, error }) => {
+        if (error || !data) {
+          toast.error(error?.message ?? "Could not place bet");
+          s.slots.forEach((sl) => {
+            if (sl.status === "active") {
+              s.realBalance += sl.stake;
+              sl.status = "none";
+              sl.stake = 0;
+            }
+          });
+          s.realPending = false;
+          s.crashPoint = randomCrashPoint();
+          render();
+          return;
+        }
+        const res = data as { round_id: string; balance: number };
+        s.realRoundId = res.round_id;
+        s.realBalance = Number(res.balance);
+        s.realPending = false;
+        pollReal(res.round_id);
+      });
+  }, [render]);
+
+  const pollReal = useCallback(
+    (roundId: string) => {
+      const tick = async () => {
+        const s = g.current;
+        if (s.realRoundId !== roundId) return;
+        const { data, error } = await supabase.rpc("real_round_status", { _round_id: roundId });
+        if (error) {
+          setTimeout(tick, 800);
+          return;
+        }
+        const res = data as { crashed: boolean; crash_point?: number; balance?: number; bets?: RealBetRow[] };
+        if (!res.crashed) {
+          setTimeout(tick, 350);
+          return;
+        }
+        s.crashPoint = Number(res.crash_point);
+        s.realBalance = Number(res.balance);
+        // auto cash-outs settled by the server
+        (res.bets ?? []).forEach((b) => {
+          const slot = s.slots[b.slot as 0 | 1];
+          if (b.status === "won" && slot.status === "active") {
+            recordBet({ id: `${s.round}-${b.slot}`, round: s.round, stake: Number(b.stake), cashedAt: Number(b.cashed_at), win: Number(b.payout), time: Date.now() });
+            toast.success(`Auto cashed out at ${formatMult(Number(b.cashed_at))}`, { description: `You won ${formatTsh(Number(b.payout))}` });
+            slot.status = "none";
+            slot.stake = 0;
+          }
+        });
+      };
+      setTimeout(tick, 300);
+    },
+    [recordBet],
+  );
+
   // Game loop
   useEffect(() => {
     if (!hydrated) return;
@@ -222,9 +362,12 @@ export function useAviatorGame() {
         s.slots.forEach((slot) => {
           if (slot.status === "queued") slot.status = "active";
         });
+        if (modeRef.current === "real" && s.slots.some((sl) => sl.status === "active")) {
+          startRealRound();
+        }
       } else if (s.phase === "flying") {
         const m = multiplierAt(elapsed);
-        if (m >= s.crashPoint) {
+        if (m >= s.crashPoint && !s.realPending) {
           s.multiplier = s.crashPoint;
           s.phase = "crashed";
           s.phaseStart = t;
@@ -236,11 +379,12 @@ export function useAviatorGame() {
             }
           });
           s.history = [s.crashPoint, ...s.history].slice(0, 30);
+          s.realRoundId = null;
           persist();
         } else {
           s.multiplier = m;
           s.slots.forEach((slot, idx) => {
-            if (slot.status === "active" && slot.autoCashout && m >= slot.autoCashoutAt) {
+            if (slot.status === "active" && slot.autoCashout && m >= slot.autoCashoutAt && !s.realPending) {
               cashOut(idx as 0 | 1, slot.autoCashoutAt);
             }
           });
@@ -258,7 +402,7 @@ export function useAviatorGame() {
           if (slot.autoBet && slot.status === "none") {
             if (!placeBet(idx as 0 | 1, true)) {
               slot.autoBet = false;
-              toast.error(`Auto bet #${idx + 1} stopped: not enough demo credits.`);
+              toast.error(`Auto bet #${idx + 1} stopped: not enough ${modeRef.current === "real" ? "balance" : "demo credits"}.`);
             }
           }
         });
@@ -269,7 +413,7 @@ export function useAviatorGame() {
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [hydrated, cashOut, persist, placeBet, recordBet]);
+  }, [hydrated, cashOut, persist, placeBet, recordBet, startRealRound]);
 
   const s = g.current;
   return {
@@ -278,7 +422,7 @@ export function useAviatorGame() {
     elapsed: hydrated ? Math.max(0, now - s.phaseStart) : 0,
     round: s.round,
     multiplier: s.multiplier,
-    balance: s.balance,
+    balance: mode === "real" ? s.realBalance : s.balance,
     slots: s.slots,
     history: s.history,
     myBets: s.myBets,
