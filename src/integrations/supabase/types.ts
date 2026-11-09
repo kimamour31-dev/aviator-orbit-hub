@@ -14,16 +14,269 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      balance_adjustments: {
+        Row: {
+          admin_id: string
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          user_id: string
+        }
+        Insert: {
+          admin_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id: string
+        }
+        Update: {
+          admin_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      game_settings: {
+        Row: {
+          house_edge: number
+          id: number
+          max_bet: number
+          max_multiplier: number
+          max_payout: number
+          min_bet: number
+          real_mode_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          house_edge?: number
+          id?: number
+          max_bet?: number
+          max_multiplier?: number
+          max_payout?: number
+          min_bet?: number
+          real_mode_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          house_edge?: number
+          id?: number
+          max_bet?: number
+          max_multiplier?: number
+          max_payout?: number
+          min_bet?: number
+          real_mode_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      odds_rules: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          end_hour: number
+          id: string
+          label: string
+          max_multiplier: number
+          start_hour: number
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          end_hour: number
+          id?: string
+          label?: string
+          max_multiplier: number
+          start_hour: number
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          end_hour?: number
+          id?: string
+          label?: string
+          max_multiplier?: number
+          start_hour?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          balance: number
+          created_at: string
+          display_name: string | null
+          id: string
+          phone: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          display_name?: string | null
+          id: string
+          phone: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      real_bets: {
+        Row: {
+          auto_cashout: number | null
+          cashed_at: number | null
+          created_at: string
+          id: string
+          payout: number
+          round_id: string
+          slot: number
+          stake: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          auto_cashout?: number | null
+          cashed_at?: number | null
+          created_at?: string
+          id?: string
+          payout?: number
+          round_id: string
+          slot: number
+          stake: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          auto_cashout?: number | null
+          cashed_at?: number | null
+          created_at?: string
+          id?: string
+          payout?: number
+          round_id?: string
+          slot?: number
+          stake?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "real_bets_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "real_rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      real_rounds: {
+        Row: {
+          crash_point: number
+          ended: boolean
+          id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          crash_point: number
+          ended?: boolean
+          id?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          crash_point?: number
+          ended?: boolean
+          id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_risk: {
+        Row: {
+          blocked: boolean
+          house_edge: number | null
+          max_bet: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocked?: boolean
+          house_edge?: number | null
+          max_bet?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocked?: boolean
+          house_edge?: number | null
+          max_bet?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      _mult_since: { Args: { _t: string }; Returns: number }
+      _settle_round: { Args: { _rid: string }; Returns: undefined }
+      admin_adjust_balance: {
+        Args: { _amount: number; _note: string; _user_id: string }
+        Returns: number
+      }
+      admin_stats: { Args: { _days: number }; Returns: Json }
+      cash_out_real: {
+        Args: { _round_id: string; _slot: number }
+        Returns: Json
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      real_round_status: { Args: { _round_id: string }; Returns: Json }
+      start_real_round: {
+        Args: {
+          _auto1: number
+          _auto2: number
+          _stake1: number
+          _stake2: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +403,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
