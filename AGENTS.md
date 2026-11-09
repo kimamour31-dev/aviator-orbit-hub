@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+
+- Aviator game rules (crash odds, payout, bet validation) live as pure functions in `src/lib/aviator.ts` with tests beside them; UI and the round loop in `src/hooks/use-aviator-game.ts` only call them, so the rules stay testable.
+- The game runs entirely in the browser with virtual credits saved to localStorage; there is no backend, so nothing here touches real money.
