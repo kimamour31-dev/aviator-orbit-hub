@@ -30,8 +30,8 @@ function AuthPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const normalized = normalizeTzPhone(phone);
-    if (!normalized) return toast.error("Enter a valid Tanzanian mobile number, e.g. 0712 345 678");
-    if (password.length < 6) return toast.error("Password must be at least 6 characters");
+    if (!normalized) { toast.error("Enter a valid Tanzanian mobile number, e.g. 0712 345 678"); return; }
+    if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     setBusy(true);
     const email = phoneToAuthEmail(normalized);
     const { error } =
