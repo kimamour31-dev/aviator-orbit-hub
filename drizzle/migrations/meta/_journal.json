@@ -8,6 +8,13 @@
       "when": 1794259035085,
       "tag": "0000_real_mode_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794259049990,
+      "tag": "0001_fix_settle",
+      "breakpoints": true
     }
   ]
 }
