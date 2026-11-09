@@ -21,7 +21,7 @@ export function crashPointFrom(r: number): number {
 export function randomCrashPoint(): number {
   const buf = new Uint32Array(1);
   crypto.getRandomValues(buf);
-  return crashPointFrom(buf[0] / 2 ** 32);
+  return crashPointFrom((buf[0] ?? 0) / 2 ** 32);
 }
 
 export function multiplierAt(elapsedMs: number): number {

@@ -53,7 +53,7 @@ function makeSimBets(): SimBet[] {
   const pool = [...NAMES].sort(() => Math.random() - 0.5).slice(0, count);
   return pool.map((name) => ({
     name,
-    stake: STAKES[Math.floor(Math.random() * STAKES.length)],
+    stake: STAKES[Math.floor(Math.random() * STAKES.length)] ?? 1000,
     target: Math.round((1.1 + Math.random() ** 2.2 * 8) * 100) / 100,
     cashedAt: null,
   }));
