@@ -25,12 +25,12 @@ export function AdminOddsRules() {
 
   const add = async () => {
     const m = Number(cap);
-    if (!Number.isFinite(m) || m < 1) return toast.error("The cap must be 1x or higher");
-    if (start === end) return toast.error("Start and end hour must be different");
+    if (!Number.isFinite(m) || m < 1) { toast.error("The cap must be 1x or higher"); return; }
+    if (start === end) { toast.error("Start and end hour must be different"); return; }
     setBusy(true);
     const { error } = await supabase.from("odds_rules").insert({ label: label.trim() || "Rule", start_hour: start, end_hour: end === 0 ? 24 : end, max_multiplier: m });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Time cap added");
     void load();
   };

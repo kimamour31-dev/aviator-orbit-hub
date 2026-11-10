@@ -23,15 +23,15 @@ export function AdminPromoCodes() {
 
   const add = async () => {
     const c = normalizePromoCode(code);
-    if (!c) return toast.error("Use 2–30 letters, numbers, - or _");
+    if (!c) { toast.error("Use 2–30 letters, numbers, - or _"); return; }
     const b = toInt(bonus) ?? 0;
-    if (b < 0) return toast.error("Bonus can't be negative");
+    if (b < 0) { toast.error("Bonus can't be negative"); return; }
     const mu = maxUses.trim() === "" ? null : toInt(maxUses);
-    if (maxUses.trim() !== "" && (!mu || mu < 1)) return toast.error("Max uses must be 1 or more, or empty for unlimited");
+    if (maxUses.trim() !== "" && (!mu || mu < 1)) { toast.error("Max uses must be 1 or more, or empty for unlimited"); return; }
     setBusy(true);
     const { error } = await supabase.from("promo_codes").insert({ code: c, bonus: b, max_uses: mu, note: note.trim() || null });
     setBusy(false);
-    if (error) return toast.error(error.code === "23505" ? "That code already exists" : error.message);
+    if (error) { toast.error(error.code === "23505" ? "That code already exists" : error.message); return; }
     toast.success(`Promo code ${c} created`);
     setCode("");
     setNote("");

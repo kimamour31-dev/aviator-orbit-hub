@@ -77,7 +77,7 @@ export function AdminPlayers() {
   );
 }
 
-function PlayerDetail({ player, risk, onChanged }: { player: Profile; risk?: Risk; onChanged: () => Promise<void> }) {
+function PlayerDetail({ player, risk, onChanged }: { player: Profile; risk: Risk | undefined; onChanged: () => Promise<void> }) {
   const [edge, setEdge] = useState(risk?.house_edge != null ? String(Math.round(Number(risk.house_edge) * 10000) / 100) : "");
   const [maxBet, setMaxBet] = useState(risk?.max_bet != null ? String(risk.max_bet) : "");
   const [blocked, setBlocked] = useState(risk?.blocked ?? false);
@@ -97,25 +97,25 @@ function PlayerDetail({ player, risk, onChanged }: { player: Profile; risk?: Ris
 
   const saveRisk = async () => {
     const e = edge.trim() === "" ? null : parseHouseEdgePercent(edge);
-    if (edge.trim() !== "" && e === null) return toast.error("House edge must be between 0% and 50%");
+    if (edge.trim() !== "" && e === null) { toast.error("House edge must be between 0% and 50%"); return; }
     const mb = maxBet.trim() === "" ? null : toInt(maxBet);
-    if (maxBet.trim() !== "" && (!mb || mb < 1)) return toast.error("Maximum bet must be above 0");
+    if (maxBet.trim() !== "" && (!mb || mb < 1)) { toast.error("Maximum bet must be above 0"); return; }
     setBusy(true);
     const { error } = await supabase.from("user_risk").upsert({ user_id: player.id, house_edge: e, max_bet: mb, blocked, updated_at: new Date().toISOString() });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Player risk saved");
     void onChanged();
   };
 
   const adjust = async (sign: 1 | -1) => {
     const n = toInt(amount);
-    if (!n || n <= 0) return toast.error("Enter an amount above 0");
-    if (!note.trim()) return toast.error("Add a short note, e.g. 'M-Pesa deposit ref 123'");
+    if (!n || n <= 0) { toast.error("Enter an amount above 0"); return; }
+    if (!note.trim()) { toast.error("Add a short note, e.g. 'M-Pesa deposit ref 123'"); return; }
     setBusy(true);
     const { data, error } = await supabase.rpc("admin_adjust_balance", { _user_id: player.id, _amount: sign * n, _note: note.trim() });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`New balance: ${formatTsh(Number(data))}`);
     setAmount("");
     setNote("");

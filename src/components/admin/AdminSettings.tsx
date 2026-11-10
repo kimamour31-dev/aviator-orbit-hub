@@ -33,11 +33,11 @@ export function AdminSettings() {
     const maxBet = toInt(form.maxBet);
     const maxMult = Number(form.maxMult);
     const maxPayout = toInt(form.maxPayout);
-    if (edge === null) return toast.error("House edge must be between 0% and 50%");
-    if (!minBet || minBet < 1) return toast.error("Minimum bet must be at least 1 TSh");
-    if (!maxBet || maxBet < minBet) return toast.error("Maximum bet must be at least the minimum bet");
-    if (!Number.isFinite(maxMult) || maxMult < 1.01) return toast.error("Highest multiplier must be at least 1.01x");
-    if (!maxPayout || maxPayout < 1) return toast.error("Biggest payout must be above 0");
+    if (edge === null) { toast.error("House edge must be between 0% and 50%"); return; }
+    if (!minBet || minBet < 1) { toast.error("Minimum bet must be at least 1 TSh"); return; }
+    if (!maxBet || maxBet < minBet) { toast.error("Maximum bet must be at least the minimum bet"); return; }
+    if (!Number.isFinite(maxMult) || maxMult < 1.01) { toast.error("Highest multiplier must be at least 1.01x"); return; }
+    if (!maxPayout || maxPayout < 1) { toast.error("Biggest payout must be above 0"); return; }
     setBusy(true);
     const { error } = await supabase
       .from("game_settings")
