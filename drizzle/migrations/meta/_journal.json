@@ -15,6 +15,13 @@
       "when": 1794259049990,
       "tag": "0001_fix_settle",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794297923431,
+      "tag": "0002_promo_codes_admin_tools",
+      "breakpoints": true
     }
   ]
 }
