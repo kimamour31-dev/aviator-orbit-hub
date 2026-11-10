@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { formatTsh } from "@/lib/aviator";
+import { BarChart3, Clock, Gift, ListOrdered, Settings2, Users } from "lucide-react";
+import { useState } from "react";
+import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
+import { AdminBets } from "@/components/admin/AdminBets";
+import { AdminOddsRules } from "@/components/admin/AdminOddsRules";
+import { AdminOverview } from "@/components/admin/AdminOverview";
+import { AdminPlayers } from "@/components/admin/AdminPlayers";
+import { AdminPromoCodes } from "@/components/admin/AdminPromoCodes";
+import { AdminSettings } from "@/components/admin/AdminSettings";
+import { useSession } from "@/hooks/use-session";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -19,43 +26,66 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Stats = { staked: number; paid: number; bets: number; players: number; users_total: number; balances_total: number };
+const TABS = [
+  { id: "profit", label: "Profit", icon: BarChart3 },
+  { id: "settings", label: "Game settings", icon: Settings2 },
+  { id: "odds", label: "Time caps", icon: Clock },
+  { id: "players", label: "Players & risk", icon: Users },
+  { id: "promo", label: "Promo codes", icon: Gift },
+  { id: "bets", label: "Bets", icon: ListOrdered },
+] as const;
+type TabId = (typeof TABS)[number]["id"];
 
 function AdminPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const session = useSession();
+  const [tab, setTab] = useState<TabId>("profit");
 
-  useEffect(() => {
-    void supabase.rpc("admin_stats", { _days: 30 }).then(({ data, error }) => {
-      if (error) setError("Admins only.");
-      else setStats(data as unknown as Stats);
-    });
-  }, []);
+  if (session.loading) return <Shell><p className="text-sm text-muted-foreground">Loading…</p></Shell>;
+  if (!session.user)
+    return (
+      <Shell>
+        <p className="text-sm text-foreground">Sign in with your admin account to open the panel.</p>
+        <Link to="/auth" className="mt-3 inline-block rounded-xl bg-bet px-4 py-2 text-sm font-bold text-bet-foreground">Sign in</Link>
+      </Shell>
+    );
+  if (!session.isAdmin) return <Shell><p className="text-sm text-destructive">This page is for admins only.</p></Shell>;
 
   return (
-    <div className="mx-auto min-h-screen max-w-3xl bg-background p-6 text-foreground">
-      <Link to="/" className="text-sm text-muted-foreground underline">Back to the game</Link>
-      <h1 className="mt-3 font-display text-2xl font-extrabold">Admin · last 30 days</h1>
-      {error && <p className="mt-4 text-destructive">{error}</p>}
-      {stats && (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Card label="Profit" value={formatTsh(Number(stats.staked) - Number(stats.paid))} />
-          <Card label="Total staked" value={formatTsh(Number(stats.staked))} />
-          <Card label="Paid out" value={formatTsh(Number(stats.paid))} />
-          <Card label="Bets" value={String(stats.bets)} />
-          <Card label="Players" value={String(stats.players)} />
-          <Card label="Player balances" value={formatTsh(Number(stats.balances_total))} />
-        </div>
-      )}
-    </div>
+    <Shell>
+      <nav className="mb-4 flex gap-1.5 overflow-x-auto pb-1">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold ${tab === t.id ? "bg-primary text-primary-foreground" : "border border-border bg-card text-muted-foreground hover:text-foreground"}`}
+          >
+            <t.icon className="size-3.5" /> {t.label}
+          </button>
+        ))}
+      </nav>
+      {tab === "profit" && <AdminOverview />}
+      {tab === "settings" && <AdminSettings />}
+      {tab === "odds" && <AdminOddsRules />}
+      {tab === "players" && <AdminPlayers />}
+      {tab === "promo" && <AdminPromoCodes />}
+      {tab === "bets" && <AdminBets />}
+    </Shell>
   );
 }
 
-function Card({ label, value }: { label: string; value: string }) {
+function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <p className="text-xs uppercase text-muted-foreground">{label}</p>
-      <p className="font-display text-lg font-bold">{value}</p>
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="border-b border-border">
+        <div className="mx-auto flex max-w-4xl items-center gap-2.5 px-4 py-3">
+          <img src={logo.url} alt="OMUH 360 Aviator logo" className="size-9 rounded-xl" />
+          <p className="font-display text-base font-extrabold">
+            OMUH <span className="text-gold">360</span> <span className="text-muted-foreground">· Admin</span>
+          </p>
+          <Link to="/" className="ml-auto text-xs font-semibold text-muted-foreground underline">Back to the game</Link>
+        </div>
+      </header>
+      <main className="mx-auto max-w-4xl px-4 py-5">{children}</main>
     </div>
   );
 }

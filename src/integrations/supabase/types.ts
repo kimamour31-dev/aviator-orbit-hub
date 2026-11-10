@@ -111,6 +111,8 @@ export type Database = {
           display_name: string | null
           id: string
           phone: string
+          promo_bonus: number
+          promo_code: string | null
         }
         Insert: {
           balance?: number
@@ -118,6 +120,8 @@ export type Database = {
           display_name?: string | null
           id: string
           phone: string
+          promo_bonus?: number
+          promo_code?: string | null
         }
         Update: {
           balance?: number
@@ -125,6 +129,38 @@ export type Database = {
           display_name?: string | null
           id?: string
           phone?: string
+          promo_bonus?: number
+          promo_code?: string | null
+        }
+        Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          active: boolean
+          bonus: number
+          code: string
+          created_at: string
+          max_uses: number | null
+          note: string | null
+          uses: number
+        }
+        Insert: {
+          active?: boolean
+          bonus?: number
+          code: string
+          created_at?: string
+          max_uses?: number | null
+          note?: string | null
+          uses?: number
+        }
+        Update: {
+          active?: boolean
+          bonus?: number
+          code?: string
+          created_at?: string
+          max_uses?: number | null
+          note?: string | null
+          uses?: number
         }
         Relationships: []
       }
@@ -257,6 +293,7 @@ export type Database = {
         Args: { _round_id: string; _slot: number }
         Returns: Json
       }
+      check_promo_code: { Args: { _code: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

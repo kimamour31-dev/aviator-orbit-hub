@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeTzPhone, phoneToAuthEmail } from "@/lib/phone";
+import { normalizePromoCode } from "@/lib/admin-rules";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -25,6 +26,7 @@ function AuthPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [promoInput, setPromoInput] = useState("");
   const [busy, setBusy] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
@@ -32,14 +34,27 @@ function AuthPage() {
     const normalized = normalizeTzPhone(phone);
     if (!normalized) { toast.error("Enter a valid Tanzanian mobile number, e.g. 0712 345 678"); return; }
     if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+    let promo: string | null = null;
+    if (tab === "signup" && promoInput.trim()) {
+      promo = normalizePromoCode(promoInput);
+      if (!promo) { toast.error("That promo code doesn't look right. Check it or leave the field empty."); return; }
+    }
     setBusy(true);
+    if (promo) {
+      const { data: ok } = await supabase.rpc("check_promo_code", { _code: promo });
+      if (!ok) {
+        setBusy(false);
+        toast.error("This promo code is not valid or has expired. Check it or leave the field empty.");
+        return;
+      }
+    }
     const email = phoneToAuthEmail(normalized);
     const { error } =
       tab === "signup"
         ? await supabase.auth.signUp({
             email,
             password,
-            options: { data: { phone: normalized, display_name: name || null }, emailRedirectTo: window.location.origin },
+            options: { data: { phone: normalized, display_name: name || null, promo_code: promo }, emailRedirectTo: window.location.origin },
           })
         : await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
@@ -85,6 +100,18 @@ function AuthPage() {
           <Field label="Password">
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="auth-input" required />
           </Field>
+          {tab === "signup" && (
+            <Field label="Promo code (if you have one)">
+              <input
+                value={promoInput}
+                onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                placeholder="e.g. WELCOME"
+                className="auth-input uppercase"
+                maxLength={30}
+                autoCapitalize="characters"
+              />
+            </Field>
+          )}
           <button disabled={busy} className="w-full rounded-xl bg-bet py-2.5 font-bold text-bet-foreground hover:brightness-110 disabled:opacity-60">
             {busy ? "Please wait…" : tab === "signin" ? "Sign in" : "Create account"}
           </button>
