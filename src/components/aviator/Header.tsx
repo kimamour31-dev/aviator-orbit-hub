@@ -8,8 +8,8 @@ import { DepositDialog } from "./DepositDialog";
 type HeaderProps = {
   balance: number;
   signedIn: boolean;
-  userId?: string;
-  phone?: string;
+  userId?: string | undefined;
+  phone?: string | undefined;
   isAdmin: boolean;
   onSignOut: () => void;
 };

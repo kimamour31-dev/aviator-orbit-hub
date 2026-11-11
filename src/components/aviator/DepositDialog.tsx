@@ -28,7 +28,7 @@ function NetworkMark({ id }: { id: NetworkId }) {
   return <span className={`font-display text-base font-extrabold tracking-tight ${NETWORK_STYLE[id]}`}>{label}</span>;
 }
 
-export function DepositDialog({ userId, defaultPhone }: { userId: string; defaultPhone?: string }) {
+export function DepositDialog({ userId, defaultPhone }: { userId: string; defaultPhone?: string | undefined }) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"pay" | "history">("pay");
   const [network, setNetwork] = useState<NetworkId | null>(null);
