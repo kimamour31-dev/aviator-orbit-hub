@@ -45,7 +45,7 @@ export function BetsPanel({ phase, simBets, myBets, topWins }: Props) {
             </span>
             <span className="font-bold text-primary">{formatTsh(total)}</span>
           </div>
-          <p className="px-4 pb-2 text-[10px] uppercase tracking-wider text-muted-foreground">Simulated players · demo</p>
+          <p className="px-4 pb-2 text-[10px] uppercase tracking-wider text-muted-foreground">Simulated players</p>
           <ul className="flex-1 space-y-1.5 overflow-y-auto px-3 pb-3">
             {simBets.map((b) => {
               const won = b.cashedAt !== null;

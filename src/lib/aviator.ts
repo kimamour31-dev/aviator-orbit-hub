@@ -1,4 +1,4 @@
-// Pure game rules for the Aviator crash game (play-money demo).
+// Pure game rules for the Aviator crash game.
 
 /** Share of every stake returned to players on average. 0.99 => 99% RTP. */
 export const RTP = 0.99;
@@ -44,7 +44,7 @@ export function validateBet(amount: number, balance: number): BetCheck {
     return { ok: false, reason: "Place a bet greater than 0 TSh." };
   }
   if (amount > balance) {
-    return { ok: false, reason: "Not enough demo credits for this bet." };
+    return { ok: false, reason: "Not enough balance for this bet." };
   }
   return { ok: true };
 }
