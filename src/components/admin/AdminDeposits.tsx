@@ -28,7 +28,9 @@ export function AdminDeposits() {
       setAccounts(Object.fromEntries((p ?? []).map((x) => [x.id, x.phone])));
     }
   }, [filter]);
-  useEffect(() => void load(), [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   async function review(id: string, approve: boolean) {
     setBusy(id);
@@ -59,7 +61,7 @@ export function AdminDeposits() {
                 <p className="font-display text-base font-bold tabular-nums text-foreground">{formatTsh(Number(d.amount))}</p>
                 <p className="text-xs text-muted-foreground">
                   {NETWORKS.find((n) => n.id === d.network)?.label} from {formatPhone(d.phone)} · account{" "}
-                  {accounts[d.user_id] ? formatPhone(accounts[d.user_id]) : "—"} · {new Date(d.created_at).toLocaleString()}
+                  {accounts[d.user_id] ? formatPhone(accounts[d.user_id] ?? "") : "—"} · {new Date(d.created_at).toLocaleString()}
                 </p>
                 {d.admin_note && <p className="mt-1 text-xs text-muted-foreground">Note: {d.admin_note}</p>}
               </div>
