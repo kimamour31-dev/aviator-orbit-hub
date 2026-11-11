@@ -1,21 +1,17 @@
-import { HelpCircle, LogIn, LogOut, RotateCcw, Settings, ShieldCheck } from "lucide-react";
+import { HelpCircle, LogIn, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import type { GameMode } from "@/hooks/use-aviator-game";
 import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatTsh } from "@/lib/aviator";
 
 type HeaderProps = {
   balance: number;
-  onReset: () => void;
-  mode: GameMode;
-  onModeChange: (m: GameMode) => void;
   signedIn: boolean;
   isAdmin: boolean;
   onSignOut: () => void;
 };
 
-export function Header({ balance, onReset, mode, onModeChange, signedIn, isAdmin, onSignOut }: HeaderProps) {
+export function Header({ balance, signedIn, isAdmin, onSignOut }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-5">
@@ -42,22 +38,11 @@ export function Header({ balance, onReset, mode, onModeChange, signedIn, isAdmin
         </div>
 
         <div className="ml-auto flex items-center gap-2 md:ml-0">
-          <div className="flex rounded-full border border-border bg-card p-0.5 text-[11px] font-bold uppercase">
-            {(["demo", "real"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => onModeChange(m)}
-                className={`rounded-full px-3 py-1 transition-colors ${mode === m ? (m === "real" ? "bg-gold text-background" : "bg-primary text-primary-foreground") : "text-muted-foreground hover:text-foreground"}`}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
           <div className="md:hidden">
             <HowToPlay compact />
           </div>
           <div className="rounded-xl border border-border bg-card px-3 py-1 text-right">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{mode === "real" ? "Balance" : "Demo balance"}</p>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Balance</p>
             <p className="font-display text-sm font-bold tabular-nums text-foreground">{formatTsh(balance)}</p>
           </div>
           {isAdmin && (
@@ -75,13 +60,6 @@ export function Header({ balance, onReset, mode, onModeChange, signedIn, isAdmin
               <LogIn className="size-3.5" /> Sign in
             </Link>
           )}
-          {mode === "demo" && <button
-            onClick={onReset}
-            className="flex items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-primary-foreground hover:brightness-110"
-          >
-            <RotateCcw className="size-3.5" />
-            <span className="hidden sm:inline">Reset credits</span>
-          </button>}
         </div>
       </div>
     </header>
@@ -115,7 +93,7 @@ function HowToPlay({ compact = false }: { compact?: boolean }) {
           </li>
         </ol>
         <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-          This is a free demo using virtual credits. Nothing here can be deposited, withdrawn or exchanged for real money.
+          Play with your OMUH 360 account balance. Your balance is managed by the operator.
         </p>
       </DialogContent>
     </Dialog>
