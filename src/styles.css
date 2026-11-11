@@ -70,6 +70,11 @@
   --color-tier-low: var(--tier-low);
   --color-tier-mid: var(--tier-mid);
   --color-tier-high: var(--tier-high);
+  --color-mpesa: var(--mpesa);
+  --color-mpesa-accent: var(--mpesa-accent);
+  --color-tigo: var(--tigo);
+  --color-airtel: var(--airtel);
+  --color-halopesa: var(--halopesa);
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --color-sidebar: var(--sidebar);
@@ -112,6 +117,11 @@
   --tier-low: oklch(0.72 0.13 235);
   --tier-mid: oklch(0.7 0.17 305);
   --tier-high: oklch(0.7 0.2 350);
+  --mpesa: oklch(0.68 0.19 145);
+  --mpesa-accent: oklch(0.6 0.23 27);
+  --tigo: oklch(0.6 0.15 250);
+  --airtel: oklch(0.6 0.23 27);
+  --halopesa: oklch(0.72 0.18 55);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
