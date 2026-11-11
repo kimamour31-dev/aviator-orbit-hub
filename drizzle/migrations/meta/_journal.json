@@ -22,6 +22,13 @@
       "when": 1794297923431,
       "tag": "0002_promo_codes_admin_tools",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794383728145,
+      "tag": "0003_deposit_requests",
+      "breakpoints": true
     }
   ]
 }

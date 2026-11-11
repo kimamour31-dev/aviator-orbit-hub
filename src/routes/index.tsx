@@ -37,6 +37,8 @@ function Index() {
       <Header
         balance={game.balance}
         signedIn={Boolean(session.user)}
+        userId={session.user?.id}
+        phone={session.profile?.phone}
         isAdmin={session.isAdmin}
         onSignOut={() => void session.signOut()}
       />

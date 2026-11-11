@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Clock, Gift, ListOrdered, Settings2, Users } from "lucide-react";
+import { BarChart3, Clock, Gift, ListOrdered, Settings2, Users, Wallet } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
 import { AdminBets } from "@/components/admin/AdminBets";
+import { AdminDeposits } from "@/components/admin/AdminDeposits";
 import { AdminOddsRules } from "@/components/admin/AdminOddsRules";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminPlayers } from "@/components/admin/AdminPlayers";
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/admin")({
 
 const TABS = [
   { id: "profit", label: "Profit", icon: BarChart3 },
+  { id: "deposits", label: "Deposits", icon: Wallet },
   { id: "settings", label: "Game settings", icon: Settings2 },
   { id: "odds", label: "Time caps", icon: Clock },
   { id: "players", label: "Players & risk", icon: Users },
@@ -64,6 +66,7 @@ function AdminPage() {
         ))}
       </nav>
       {tab === "profit" && <AdminOverview />}
+      {tab === "deposits" && <AdminDeposits />}
       {tab === "settings" && <AdminSettings />}
       {tab === "odds" && <AdminOddsRules />}
       {tab === "players" && <AdminPlayers />}

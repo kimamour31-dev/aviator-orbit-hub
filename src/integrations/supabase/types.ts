@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      deposit_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          network: string
+          phone: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          network: string
+          phone: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          network?: string
+          phone?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_settings: {
         Row: {
           house_edge: number
@@ -302,6 +341,14 @@ export type Database = {
         Returns: boolean
       }
       real_round_status: { Args: { _round_id: string }; Returns: Json }
+      request_deposit: {
+        Args: { _amount: number; _network: string; _phone: string }
+        Returns: string
+      }
+      review_deposit: {
+        Args: { _approve: boolean; _id: string; _note: string }
+        Returns: string
+      }
       start_real_round: {
         Args: {
           _auto1: number
