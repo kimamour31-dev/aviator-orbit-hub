@@ -12,7 +12,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — OMUH 360 Aviator" },
       { name: "description", content: "Sign in or create your OMUH 360 Aviator account with your phone number and password." },
       { property: "og:title", content: "Sign in — OMUH 360 Aviator" },
-      { property: "og:description", content: "Create an account with your phone number to play in Real mode." },
+      { property: "og:description", content: "Create an account with your phone number to play Aviator." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -117,7 +117,7 @@ function AuthPage() {
           </button>
         </form>
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          <Link to="/" className="underline">Back to the game</Link> · Demo mode needs no account.
+          <Link to="/" className="underline">Back to the game</Link>
         </p>
       </div>
     </div>

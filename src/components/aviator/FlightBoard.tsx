@@ -49,7 +49,7 @@ export function FlightBoard({ phase, elapsed, multiplier, round }: Props) {
           Round <span className="font-mono text-foreground">#{String(round).padStart(5, "0")}</span>
         </span>
         <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-muted-foreground">
-          Demo · virtual credits only
+          Real mode
         </span>
       </div>
 
