@@ -7,7 +7,6 @@ import {
   formatMult,
   formatTsh,
   multiplierAt,
-  payout,
   randomCrashPoint,
   validateBet,
 } from "@/lib/aviator";

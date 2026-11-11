@@ -6,7 +6,6 @@ export const RTP = 0.99;
 export const GROWTH_PER_MS = 0.00008;
 export const WAITING_MS = 6000;
 export const CRASHED_MS = 3500;
-export const STARTING_BALANCE = 10000;
 
 /**
  * Crash point from a uniform random number r in [0, 1).
