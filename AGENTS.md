@@ -32,6 +32,6 @@ use the editor.
 ## Project rules
 
 - Aviator game rules (crash odds, payout, bet validation) live as pure functions in `src/lib/aviator.ts` with tests beside them; UI and the round loop in `src/hooks/use-aviator-game.ts` only call them, so the rules stay testable.
-- Demo mode runs in the browser with localStorage credits; Real mode rounds, balances and payouts run only in security-definer database functions, so players can't tamper with odds or balances from the browser.
+- The game plays in real mode only — no demo/virtual-credit mode. Rounds, balances and payouts run only in security-definer database functions, so players can't tamper with odds or balances from the browser.
 - Admin screens write settings, time caps, player risk and promo codes straight to their tables under admin-only RLS; balance changes go only through `admin_adjust_balance` so each one is logged.
 - Promo codes are validated and applied in the `handle_new_user` signup trigger (sign-up metadata `promo_code`); shared pure checks live in `src/lib/admin-rules.ts` with tests.
