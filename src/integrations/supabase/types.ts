@@ -88,6 +88,7 @@ export type Database = {
           max_multiplier: number
           max_payout: number
           min_bet: number
+          payment_numbers: Json
           real_mode_enabled: boolean
           updated_at: string
         }
@@ -98,6 +99,7 @@ export type Database = {
           max_multiplier?: number
           max_payout?: number
           min_bet?: number
+          payment_numbers?: Json
           real_mode_enabled?: boolean
           updated_at?: string
         }
@@ -108,6 +110,7 @@ export type Database = {
           max_multiplier?: number
           max_payout?: number
           min_bet?: number
+          payment_numbers?: Json
           real_mode_enabled?: boolean
           updated_at?: string
         }
@@ -316,6 +319,48 @@ export type Database = {
         }
         Relationships: []
       }
+      withdrawal_requests: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          created_at: string
+          id: string
+          network: string
+          phone: string
+          reference: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          created_at?: string
+          id?: string
+          network: string
+          phone: string
+          reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          created_at?: string
+          id?: string
+          network?: string
+          phone?: string
+          reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -333,6 +378,7 @@ export type Database = {
         Returns: Json
       }
       check_promo_code: { Args: { _code: string }; Returns: boolean }
+      get_payment_numbers: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -345,8 +391,16 @@ export type Database = {
         Args: { _amount: number; _network: string; _phone: string }
         Returns: string
       }
+      request_withdrawal: {
+        Args: { _amount: number; _network: string; _phone: string }
+        Returns: string
+      }
       review_deposit: {
         Args: { _approve: boolean; _id: string; _note: string }
+        Returns: string
+      }
+      review_withdrawal: {
+        Args: { _id: string; _note: string; _paid: boolean; _reference: string }
         Returns: string
       }
       start_real_round: {

@@ -48,7 +48,7 @@ export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut }:
             <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Balance</p>
             <p className="font-display text-sm font-bold tabular-nums text-foreground">{formatTsh(balance)}</p>
           </div>
-          {signedIn && userId && <DepositDialog userId={userId} defaultPhone={phone} />}
+          {signedIn && userId && <DepositDialog userId={userId} defaultPhone={phone} balance={balance} />}
           {isAdmin && (
             <Link to="/admin" className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:bg-muted">
               <Settings className="size-3.5" />

@@ -37,7 +37,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-background bg-[radial-gradient(ellipse_at_top,_rgba(220,38,38,0.12),_transparent_60%)]">
       <Header
-        balance={session.user ? game.balance : null}
+        balance={session.user ? game.balance : 0}
         signedIn={Boolean(session.user)}
         userId={session.user?.id}
         phone={session.profile?.phone}

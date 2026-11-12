@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { CreditCard, Smartphone, History } from "lucide-react";
+import { ArrowUpFromLine, CreditCard, Smartphone, History } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatTsh } from "@/lib/aviator";
-import { checkDeposit, DEPOSIT_PRESETS, NETWORKS, type NetworkId } from "@/lib/deposit";
+import { checkWithdrawal, checkDeposit, DEPOSIT_PRESETS, NETWORKS, type NetworkId } from "@/lib/deposit";
 import { formatPhone } from "@/lib/phone";
 
 type Deposit = Tables<"deposit_requests">;
+type Withdrawal = Tables<"withdrawal_requests">;
 
 const NETWORK_STYLE: Record<NetworkId, string> = {
   mpesa: "text-mpesa",
@@ -28,9 +29,11 @@ function NetworkMark({ id }: { id: NetworkId }) {
   return <span className={`font-display text-base font-extrabold tracking-tight ${NETWORK_STYLE[id]}`}>{label}</span>;
 }
 
-export function DepositDialog({ userId, defaultPhone }: { userId: string; defaultPhone?: string | undefined }) {
+export function DepositDialog({ userId, defaultPhone, balance }: { userId: string; defaultPhone?: string | undefined; balance: number }) {
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<"pay" | "history">("pay");
+  const [tab, setTab] = useState<"pay" | "withdraw" | "history">("pay");
+  const [payNumbers, setPayNumbers] = useState<Record<string, string>>({});
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [network, setNetwork] = useState<NetworkId | null>(null);
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("5000");
@@ -46,13 +49,38 @@ export function DepositDialog({ userId, defaultPhone }: { userId: string; defaul
       .order("created_at", { ascending: false })
       .limit(20);
     setHistory(data ?? []);
+    const { data: w } = await supabase
+      .from("withdrawal_requests")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setWithdrawals(w ?? []);
   }, [userId]);
+
+  useEffect(() => {
+    if (!open) return;
+    void supabase.rpc("get_payment_numbers").then(({ data }) => setPayNumbers((data as Record<string, string>) ?? {}));
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     if (!phone && defaultPhone) setPhone(`0${defaultPhone.replace(/^255/, "")}`);
     void loadHistory();
   }, [open, defaultPhone, loadHistory, phone]);
+
+  async function submitWithdraw() {
+    const check = checkWithdrawal(network, phone, amount, balance);
+    if (!check.ok) return setError(check.error);
+    setError(null);
+    setBusy(true);
+    const { error: rpcError } = await supabase.rpc("request_withdrawal", { _network: network!, _phone: check.phone, _amount: check.amount });
+    setBusy(false);
+    if (rpcError) return setError(rpcError.message);
+    toast.success(`Withdrawal of ${formatTsh(check.amount)} requested. It's taken from your balance and paid out once the operator sends it.`);
+    await loadHistory();
+    setTab("history");
+  }
 
   async function submit() {
     const check = checkDeposit(network, phone, amount);
@@ -84,27 +112,40 @@ export function DepositDialog({ userId, defaultPhone }: { userId: string; defaul
         </DialogHeader>
 
         <div className="space-y-4 px-5 py-4">
-          <div className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-background p-1">
+          <div className="grid grid-cols-3 gap-1 rounded-xl border border-border bg-background p-1">
             <button
               onClick={() => setTab("pay")}
               className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-bold ${tab === "pay" ? "bg-bet text-bet-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <Smartphone className="size-4" /> Mobile Money
+              <Smartphone className="size-4" /> Deposit
+            </button>
+            <button
+              onClick={() => setTab("withdraw")}
+              className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-bold ${tab === "withdraw" ? "bg-bet text-bet-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              <ArrowUpFromLine className="size-4" /> Withdraw
             </button>
             <button
               onClick={() => setTab("history")}
               className={`flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-bold ${tab === "history" ? "bg-bet text-bet-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              <History className="size-4" /> My deposits
+              <History className="size-4" /> History
             </button>
           </div>
 
-          {tab === "pay" ? (
+          {tab !== "history" ? (
             <>
+              {tab === "withdraw" ? (
+                <p className="text-sm text-muted-foreground">
+                  Choose the network and number to receive your money. The amount is held from your balance now (
+                  <span className="font-bold text-foreground">{formatTsh(balance)}</span> available) and returned if the operator declines.
+                </p>
+              ) : (
               <p className="text-sm text-muted-foreground">
                 Select your network and enter your Tanzanian mobile number. Your request goes to the operator, who confirms
                 the <span className="font-bold text-foreground">mobile money payment</span> and adds it to your balance.
               </p>
+              )}
 
               <div className="grid grid-cols-4 gap-2">
                 {NETWORKS.map((n) => (
@@ -121,6 +162,12 @@ export function DepositDialog({ userId, defaultPhone }: { userId: string; defaul
                 ))}
               </div>
 
+              {tab === "pay" && network && payNumbers[network] && (
+                <div className="rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-foreground">
+                  Send to: <span className="font-display font-bold tabular-nums text-gold">{payNumbers[network]}</span>
+                </div>
+              )}
+
               <label className="block space-y-1.5">
                 <span className="text-sm font-semibold text-foreground">Tanzania Mobile Number</span>
                 <input
@@ -134,7 +181,7 @@ export function DepositDialog({ userId, defaultPhone }: { userId: string; defaul
               </label>
 
               <label className="block space-y-1.5">
-                <span className="text-sm font-semibold text-foreground">Deposit Amount (TSh)</span>
+                <span className="text-sm font-semibold text-foreground">{tab === "withdraw" ? "Withdrawal" : "Deposit"} Amount (TSh)</span>
                 <input
                   inputMode="numeric"
                   value={amount}
@@ -160,16 +207,27 @@ export function DepositDialog({ userId, defaultPhone }: { userId: string; defaul
               {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
               <button
-                onClick={() => void submit()}
+                onClick={() => void (tab === "withdraw" ? submitWithdraw() : submit())}
                 disabled={busy}
                 className="w-full rounded-xl bg-bet py-3.5 font-display text-base font-bold text-bet-foreground hover:brightness-110 disabled:opacity-60"
               >
-                {busy ? "Sending…" : "Deposit via Mobile Money"}
+                {busy ? "Sending…" : tab === "withdraw" ? "Request withdrawal" : "Deposit via Mobile Money"}
               </button>
             </>
           ) : (
             <div className="max-h-80 space-y-2 overflow-y-auto">
-              {history.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">No deposits yet.</p>}
+              {history.length === 0 && withdrawals.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nothing yet.</p>}
+              {withdrawals.map((d) => (
+                <div key={d.id} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
+                  <div>
+                    <p className="font-display text-sm font-bold tabular-nums text-destructive">−{formatTsh(Number(d.amount))} <span className="text-xs text-muted-foreground">withdrawal</span></p>
+                    <p className="text-xs text-muted-foreground">
+                      {NETWORKS.find((n) => n.id === d.network)?.label} · {formatPhone(d.phone)} · {new Date(d.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <StatusBadge status={d.status} />
+                </div>
+              ))}
               {history.map((d) => (
                 <div key={d.id} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-background px-3 py-2.5">
                   <div>
@@ -192,11 +250,11 @@ export function DepositDialog({ userId, defaultPhone }: { userId: string; defaul
 
 export function StatusBadge({ status }: { status: string }) {
   const cls =
-    status === "approved"
+    status === "approved" || status === "paid"
       ? "bg-bet/15 text-bet"
       : status === "rejected"
         ? "bg-destructive/15 text-destructive"
         : "bg-cashout/15 text-cashout";
-  const label = status === "approved" ? "Added" : status === "rejected" ? "Declined" : "Waiting";
+  const label = status === "paid" ? "Paid" : status === "approved" ? "Added" : status === "rejected" ? "Declined" : "Waiting";
   return <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${cls}`}>{label}</span>;
 }

@@ -36,7 +36,10 @@ export function AdminDeposits() {
     setBusy(id);
     const { error } = await supabase.rpc("review_deposit", { _id: id, _approve: approve, _note: notes[id] ?? "" });
     setBusy(null);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(approve ? "Deposit approved and added to the player's balance." : "Deposit declined.");
     void load();
   }

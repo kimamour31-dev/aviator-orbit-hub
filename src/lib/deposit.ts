@@ -25,3 +25,11 @@ export function checkDeposit(network: string | null, phoneInput: string, amountI
   if (amount > DEPOSIT_MAX) return { ok: false, error: "Maximum deposit is 10,000,000 TSh." };
   return { ok: true, phone, amount };
 }
+
+/** Withdrawal check: same network/phone/amount limits as deposits, plus the player must have enough balance. */
+export function checkWithdrawal(network: string | null, phoneInput: string, amountInput: string, balance: number): DepositCheck {
+  const c = checkDeposit(network, phoneInput, amountInput);
+  if (!c.ok) return { ok: false, error: c.error.replace("deposit", "withdrawal") };
+  if (c.amount > balance) return { ok: false, error: "Not enough balance for this withdrawal." };
+  return c;
+}
