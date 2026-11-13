@@ -45,7 +45,6 @@ export function BetsPanel({ phase, simBets, myBets, topWins }: Props) {
             </span>
             <span className="font-bold text-primary">{formatTsh(total)}</span>
           </div>
-          <p className="px-4 pb-2 text-[10px] uppercase tracking-wider text-muted-foreground">Simulated players</p>
           <ul className="flex-1 space-y-1.5 overflow-y-auto px-3 pb-3">
             {simBets.map((b) => {
               const won = b.cashedAt !== null;
@@ -62,7 +61,7 @@ export function BetsPanel({ phase, simBets, myBets, topWins }: Props) {
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-bold text-muted-foreground">
                     {b.name[0]}
                   </span>
-                  <span className="flex-1 truncate font-semibold text-foreground">{b.name}</span>
+                  <span className="flex-1 truncate font-semibold text-foreground">{maskName(b.name)}</span>
                   <span className="text-muted-foreground tabular-nums">{formatTsh(b.stake)}</span>
                   <span
                     className={cn(
@@ -108,4 +107,8 @@ export function BetsPanel({ phase, simBets, myBets, topWins }: Props) {
       )}
     </div>
   );
+}
+
+function maskName(name: string) {
+  return name.length <= 2 ? name : `${name[0]}***${name[name.length - 1]}`;
 }
