@@ -44,10 +44,12 @@ export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut }:
           <div className="md:hidden">
             <HowToPlay compact />
           </div>
-          <div className="rounded-xl border border-border bg-card px-3 py-1 text-right">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Balance</p>
-            <p className="font-display text-sm font-bold tabular-nums text-foreground">{formatTsh(balance)}</p>
-          </div>
+          {signedIn && (
+            <div className="rounded-xl border border-border bg-card px-3 py-1 text-right">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Balance</p>
+              <p className="font-display text-sm font-bold tabular-nums text-foreground">{formatTsh(balance)}</p>
+            </div>
+          )}
           {signedIn && userId && <DepositDialog userId={userId} defaultPhone={phone} balance={balance} />}
           {isAdmin && (
             <Link to="/admin" className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:bg-muted">
@@ -60,7 +62,7 @@ export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut }:
               <LogOut className="size-3.5" />
             </button>
           ) : (
-            <Link to="/auth" className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:bg-muted">
+            <Link to="/auth" className="flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:bg-muted">
               <LogIn className="size-3.5" /> Sign in
             </Link>
           )}

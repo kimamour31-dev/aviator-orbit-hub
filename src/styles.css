@@ -197,3 +197,16 @@
   outline: none;
   &:focus { border-color: var(--primary); }
 }
+
+@utility marquee {
+  animation: marquee 40s linear infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes marquee {
+  to {
+    translate: -50% 0;
+  }
+}
