@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkDeposit, checkWithdrawal } from "./deposit";
+import { checkDeposit, checkWithdrawal, harakaPayOutcome, toHarakaPayPhone } from "./deposit";
 
 describe("checkDeposit", () => {
   it("accepts a valid M-Pesa deposit of 5,000 TSh", () => {
@@ -29,5 +29,17 @@ describe("checkWithdrawal", () => {
   });
   it("keeps the 1,000 TSh minimum", () => {
     expect(checkWithdrawal("mpesa", "0712345678", "500", 9000).ok).toBe(false);
+  });
+});
+
+describe("HarakaPay helpers", () => {
+  it("sends the number in local 07… format", () => {
+    expect(toHarakaPayPhone("255712345678")).toBe("0712345678");
+  });
+  it("credits only completed payments", () => {
+    expect(harakaPayOutcome("completed")).toBe("credit");
+    expect(harakaPayOutcome("failed")).toBe("decline");
+    expect(harakaPayOutcome("pending")).toBe("wait");
+    expect(harakaPayOutcome(undefined)).toBe("wait");
   });
 });

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { checkHarakaPayDeposit } from "@/lib/harakapay.functions";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -16,6 +18,17 @@ export function AdminDeposits() {
   const [accounts, setAccounts] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const checkFn = useServerFn(checkHarakaPayDeposit);
+
+  async function checkHaraka(id: string) {
+    setBusy(id);
+    const res = await checkFn({ data: { id } }).catch(() => null);
+    setBusy(null);
+    if (res?.status === "approved") toast.success("HarakaPay confirmed it — added to the player's balance.");
+    else if (res?.status === "rejected") toast.error("HarakaPay says this payment failed.");
+    else toast.message("HarakaPay hasn't confirmed this payment yet.");
+    void load();
+  }
 
   const load = useCallback(async () => {
     let q = supabase.from("deposit_requests").select("*").order("created_at", { ascending: false }).limit(200);
@@ -47,7 +60,7 @@ export function AdminDeposits() {
   return (
     <Panel
       title="Deposits"
-      description="Check that the mobile money payment arrived, then approve to add it to the player's balance."
+      description="HarakaPay deposits are added to the player's balance automatically once paid. Manual deposits need your approval."
       actions={
         <div className="flex gap-1.5">
           <GhostButton onClick={() => setFilter("pending")} className={filter === "pending" ? "bg-muted" : ""}>Waiting</GhostButton>
@@ -61,16 +74,34 @@ export function AdminDeposits() {
           <div key={d.id} className="rounded-xl border border-border bg-background p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="font-display text-base font-bold tabular-nums text-foreground">{formatTsh(Number(d.amount))}</p>
+                <p className="font-display text-base font-bold tabular-nums text-foreground">
+                  {formatTsh(Number(d.amount))}
+                  <span className={`ml-2 rounded-full px-2 py-0.5 align-middle text-[10px] font-bold uppercase tracking-wide ${d.provider === "harakapay" ? "bg-gold/15 text-gold" : "bg-muted text-muted-foreground"}`}>
+                    {d.provider === "harakapay" ? "HarakaPay" : "Manual"}
+                  </span>
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {NETWORKS.find((n) => n.id === d.network)?.label} from {formatPhone(d.phone)} · account{" "}
                   {accounts[d.user_id] ? formatPhone(accounts[d.user_id] ?? "") : "—"} · {new Date(d.created_at).toLocaleString()}
                 </p>
+                {d.provider_order_id && (
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Order {d.provider_order_id}
+                    {d.provider_fee != null && ` · fee ${formatTsh(Number(d.provider_fee))} · you receive ${formatTsh(Number(d.provider_net ?? 0))}`}
+                  </p>
+                )}
                 {d.admin_note && <p className="mt-1 text-xs text-muted-foreground">Note: {d.admin_note}</p>}
               </div>
               <StatusBadge status={d.status} />
             </div>
-            {d.status === "pending" && (
+            {d.status === "pending" && d.provider === "harakapay" && (
+              <div className="mt-3">
+                <GhostButton disabled={busy === d.id} onClick={() => void checkHaraka(d.id)} className="py-2">
+                  {busy === d.id ? "Checking…" : "Check with HarakaPay"}
+                </GhostButton>
+              </div>
+            )}
+            {d.status === "pending" && d.provider !== "harakapay" && (
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <input
                   value={notes[d.id] ?? ""}

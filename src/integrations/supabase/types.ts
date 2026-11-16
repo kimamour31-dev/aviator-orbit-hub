@@ -16,7 +16,7 @@ export type Database = {
     Tables: {
       balance_adjustments: {
         Row: {
-          admin_id: string
+          admin_id: string | null
           amount: number
           created_at: string
           id: string
@@ -24,7 +24,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          admin_id: string
+          admin_id?: string | null
           amount: number
           created_at?: string
           id?: string
@@ -32,7 +32,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          admin_id?: string
+          admin_id?: string | null
           amount?: number
           created_at?: string
           id?: string
@@ -49,6 +49,10 @@ export type Database = {
           id: string
           network: string
           phone: string
+          provider: string
+          provider_fee: number | null
+          provider_net: number | null
+          provider_order_id: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -61,6 +65,10 @@ export type Database = {
           id?: string
           network: string
           phone: string
+          provider?: string
+          provider_fee?: number | null
+          provider_net?: number | null
+          provider_order_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -73,6 +81,10 @@ export type Database = {
           id?: string
           network?: string
           phone?: string
+          provider?: string
+          provider_fee?: number | null
+          provider_net?: number | null
+          provider_order_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -401,6 +413,10 @@ export type Database = {
       }
       review_withdrawal: {
         Args: { _id: string; _note: string; _paid: boolean; _reference: string }
+        Returns: string
+      }
+      settle_harakapay_deposit: {
+        Args: { _fee: number; _net: number; _order_id: string; _status: string }
         Returns: string
       }
       start_real_round: {

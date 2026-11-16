@@ -33,3 +33,15 @@ export function checkWithdrawal(network: string | null, phoneInput: string, amou
   if (c.amount > balance) return { ok: false, error: "Not enough balance for this withdrawal." };
   return c;
 }
+
+/** HarakaPay wants the local format 07XXXXXXXX; we store numbers as 2557XXXXXXXX. */
+export function toHarakaPayPhone(normalized: string): string {
+  return `0${normalized.replace(/^255/, "")}`;
+}
+
+/** Maps a HarakaPay payment status to what happens to the deposit: credit it, decline it, or keep waiting. */
+export function harakaPayOutcome(status: string | null | undefined): "credit" | "decline" | "wait" {
+  if (status === "completed") return "credit";
+  if (status === "failed") return "decline";
+  return "wait";
+}

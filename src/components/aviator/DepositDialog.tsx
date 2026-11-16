@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowUpFromLine, CreditCard, Smartphone, History } from "lucide-react";
+import { ArrowUpFromLine, CreditCard, Smartphone, History, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -7,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { formatTsh } from "@/lib/aviator";
 import { checkWithdrawal, checkDeposit, DEPOSIT_PRESETS, NETWORKS, type NetworkId } from "@/lib/deposit";
 import { formatPhone } from "@/lib/phone";
+import { checkHarakaPayDeposit, startHarakaPayDeposit } from "@/lib/harakapay.functions";
 
 type Deposit = Tables<"deposit_requests">;
 type Withdrawal = Tables<"withdrawal_requests">;
@@ -29,10 +31,22 @@ function NetworkMark({ id }: { id: NetworkId }) {
   return <span className={`font-display text-base font-extrabold tracking-tight ${NETWORK_STYLE[id]}`}>{label}</span>;
 }
 
-export function DepositDialog({ userId, defaultPhone, balance }: { userId: string; defaultPhone?: string | undefined; balance: number }) {
+export function DepositDialog({
+  userId,
+  defaultPhone,
+  balance,
+  onBalanceChange,
+}: {
+  userId: string;
+  defaultPhone?: string | undefined;
+  balance: number;
+  onBalanceChange?: (() => void) | undefined;
+}) {
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<"pay" | "withdraw" | "history">("pay");
-  const [payNumbers, setPayNumbers] = useState<Record<string, string>>({});
+  const [waiting, setWaiting] = useState<{ id: string; amount: number; startedAt: number } | null>(null);
+  const startDeposit = useServerFn(startHarakaPayDeposit);
+  const checkDeposit_ = useServerFn(checkHarakaPayDeposit);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [network, setNetwork] = useState<NetworkId | null>(null);
   const [phone, setPhone] = useState("");
@@ -58,10 +72,49 @@ export function DepositDialog({ userId, defaultPhone, balance }: { userId: strin
     setWithdrawals(w ?? []);
   }, [userId]);
 
+  // While a PIN prompt is out, ask HarakaPay every few seconds whether the player has paid.
   useEffect(() => {
-    if (!open) return;
-    void supabase.rpc("get_payment_numbers").then(({ data }) => setPayNumbers((data as Record<string, string>) ?? {}));
-  }, [open]);
+    if (!waiting) return;
+    let stopped = false;
+    const timer = setInterval(async () => {
+      if (stopped) return;
+      const res = await checkDeposit_({ data: { id: waiting.id } }).catch(() => null);
+      if (!res || stopped) return;
+      if (res.status === "approved") {
+        stopped = true;
+        setWaiting(null);
+        toast.success(`${formatTsh(waiting.amount)} added to your balance.`);
+        onBalanceChange?.();
+        void loadHistory();
+        setTab("history");
+      } else if (res.status === "rejected") {
+        stopped = true;
+        setWaiting(null);
+        setError("The payment was cancelled or failed on your phone. Please try again.");
+        void loadHistory();
+      } else if (Date.now() - waiting.startedAt > 3 * 60_000) {
+        stopped = true;
+        setWaiting(null);
+        toast.message("Still waiting for HarakaPay. Your balance updates as soon as the payment is confirmed.");
+        void loadHistory();
+        setTab("history");
+      }
+    }, 4000);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+    };
+  }, [waiting, checkDeposit_, loadHistory, onBalanceChange]);
+
+  async function recheck(id: string) {
+    const res = await checkDeposit_({ data: { id } }).catch(() => null);
+    if (res?.status === "approved") {
+      toast.success("Payment confirmed and added to your balance.");
+      onBalanceChange?.();
+    } else if (res?.status === "rejected") toast.error("This payment failed or was cancelled.");
+    else toast.message("HarakaPay hasn't confirmed this payment yet.");
+    void loadHistory();
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -87,16 +140,16 @@ export function DepositDialog({ userId, defaultPhone, balance }: { userId: strin
     if (!check.ok) return setError(check.error);
     setError(null);
     setBusy(true);
-    const { error: rpcError } = await supabase.rpc("request_deposit", {
-      _network: network!,
-      _phone: check.phone,
-      _amount: check.amount,
-    });
+    const res = await startDeposit({ data: { network: network!, phone, amount } }).catch((e: unknown) => ({
+      ok: false as const,
+      error: e instanceof Error ? e.message : "Something went wrong. Please try again.",
+    }));
     setBusy(false);
-    if (rpcError) return setError(rpcError.message);
-    toast.success(`Deposit request of ${formatTsh(check.amount)} sent. It will be added once the operator confirms it.`);
-    await loadHistory();
-    setTab("history");
+    if (!res.ok) {
+      void loadHistory();
+      return setError(res.error);
+    }
+    setWaiting({ id: res.id, amount: res.amount, startedAt: Date.now() });
   }
 
   return (
@@ -142,8 +195,9 @@ export function DepositDialog({ userId, defaultPhone, balance }: { userId: strin
                 </p>
               ) : (
               <p className="text-sm text-muted-foreground">
-                Select your network and enter your Tanzanian mobile number. Your request goes to the operator, who confirms
-                the <span className="font-bold text-foreground">mobile money payment</span> and adds it to your balance.
+                Select your network and enter your Tanzanian mobile number. You'll get a{" "}
+                <span className="font-bold text-foreground">PIN prompt on your phone</span> — enter your PIN and the money is
+                added to your balance automatically.
               </p>
               )}
 
@@ -162,11 +216,6 @@ export function DepositDialog({ userId, defaultPhone, balance }: { userId: strin
                 ))}
               </div>
 
-              {tab === "pay" && network && payNumbers[network] && (
-                <div className="rounded-xl border border-gold/40 bg-gold/10 px-3 py-2 text-sm text-foreground">
-                  Send to: <span className="font-display font-bold tabular-nums text-gold">{payNumbers[network]}</span>
-                </div>
-              )}
 
               <label className="block space-y-1.5">
                 <span className="text-sm font-semibold text-foreground">Tanzania Mobile Number</span>
@@ -206,12 +255,25 @@ export function DepositDialog({ userId, defaultPhone, balance }: { userId: strin
 
               {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
+              {tab === "pay" && waiting && (
+                <div role="status" className="flex items-start gap-3 rounded-xl border border-gold/40 bg-gold/10 px-3 py-3 text-sm text-foreground">
+                  <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin text-gold" />
+                  <div>
+                    <p className="font-bold">Check your phone</p>
+                    <p className="text-muted-foreground">
+                      Enter your mobile money PIN to pay <span className="font-bold text-foreground">{formatTsh(waiting.amount)}</span>. This
+                      updates by itself once you've paid.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <button
                 onClick={() => void (tab === "withdraw" ? submitWithdraw() : submit())}
-                disabled={busy}
+                disabled={busy || (tab === "pay" && Boolean(waiting))}
                 className="w-full rounded-xl bg-bet py-3.5 font-display text-base font-bold text-bet-foreground hover:brightness-110 disabled:opacity-60"
               >
-                {busy ? "Sending…" : tab === "withdraw" ? "Request withdrawal" : "Deposit via Mobile Money"}
+                {busy ? "Sending…" : tab === "withdraw" ? "Request withdrawal" : waiting ? "Waiting for your PIN…" : "Deposit via Mobile Money (USSD Push)"}
               </button>
             </>
           ) : (
@@ -237,7 +299,14 @@ export function DepositDialog({ userId, defaultPhone, balance }: { userId: strin
                       {new Date(d.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <StatusBadge status={d.status} />
+                  <div className="flex items-center gap-2">
+                    {d.provider === "harakapay" && d.status === "pending" && (
+                      <button onClick={() => void recheck(d.id)} className="text-xs font-bold text-gold hover:underline">
+                        Check
+                      </button>
+                    )}
+                    <StatusBadge status={d.status} />
+                  </div>
                 </div>
               ))}
             </div>

@@ -12,9 +12,10 @@ type HeaderProps = {
   phone?: string | undefined;
   isAdmin: boolean;
   onSignOut: () => void;
+  onBalanceChange?: () => void;
 };
 
-export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut }: HeaderProps) {
+export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut, onBalanceChange }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-5">
@@ -50,7 +51,7 @@ export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut }:
               <p className="font-display text-sm font-bold tabular-nums text-foreground">{formatTsh(balance)}</p>
             </div>
           )}
-          {signedIn && userId && <DepositDialog userId={userId} defaultPhone={phone} balance={balance} />}
+          {signedIn && userId && <DepositDialog userId={userId} defaultPhone={phone} balance={balance} onBalanceChange={onBalanceChange} />}
           {isAdmin && (
             <Link to="/admin" className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground hover:bg-muted">
               <Settings className="size-3.5" />
@@ -99,7 +100,7 @@ function HowToPlay({ compact = false }: { compact?: boolean }) {
           </li>
         </ol>
         <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-          Play with your OMUH 360 account balance. Your balance is managed by the operator.
+          Play with your OMUH 360 account balance. Top up any time with mobile money from the Deposit button.
         </p>
       </DialogContent>
     </Dialog>

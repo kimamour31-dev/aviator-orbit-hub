@@ -43,6 +43,7 @@ function Index() {
         phone={session.profile?.phone}
         isAdmin={session.isAdmin}
         onSignOut={() => void session.signOut()}
+        onBalanceChange={() => void session.refresh()}
       />
       {!session.user ? (
         <Landing loading={session.loading} game={game} />

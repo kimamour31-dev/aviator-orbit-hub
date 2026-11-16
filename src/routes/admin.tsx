@@ -38,7 +38,7 @@ const GROUPS: { label: string; tabs: TabDef[] }[] = [
     { id: "profit", label: "Profit", icon: BarChart3 },
     { id: "deposits", label: "Deposits", icon: Wallet },
     { id: "withdrawals", label: "Withdrawals", icon: ArrowUpFromLine },
-    { id: "payments", label: "Payment numbers", icon: Phone },
+    { id: "payments", label: "Payments", icon: Phone },
   ]},
   { label: "Game control", tabs: [
     { id: "settings", label: "Game settings", icon: Settings2 },
