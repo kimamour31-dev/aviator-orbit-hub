@@ -1,4 +1,4 @@
-```typescript
+
 // Server-only HarakaPay helpers.
 // Supports direct HarakaPay API (Vercel) and Lovable connector gateway.
 
@@ -167,4 +167,4 @@ export async function syncOrder(orderId: string): Promise<string> {
 
   return String(data);
 }
-```
+
