@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireSupabaseAuthForPayments } from "@/integrations/supabase/require-auth";
 import { checkDeposit, toHarakaPayPhone } from "./deposit";
 import { collect, syncOrder, walletBalance } from "./harakapay.server";
 
@@ -17,7 +17,7 @@ function webhookUrl(): string | undefined {
 
 /** Creates the deposit and sends the mobile money PIN prompt to the player's phone. */
 export const startHarakaPayDeposit = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireSupabaseAuthForPayments])
   .inputValidator((d) => z.object({ network: z.string().max(20), phone: z.string().max(20), amount: z.string().max(12) }).parse(d))
   .handler(async ({ data, context }) => {
     const check = checkDeposit(data.network, data.phone, data.amount);
@@ -56,7 +56,7 @@ export const startHarakaPayDeposit = createServerFn({ method: "POST" })
 
 /** Checks a HarakaPay deposit with HarakaPay and credits it once paid. Players can check their own; admins any. */
 export const checkHarakaPayDeposit = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireSupabaseAuthForPayments])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     // RLS: players only see their own deposits, admins see all.
@@ -77,7 +77,7 @@ export const checkHarakaPayDeposit = createServerFn({ method: "POST" })
 
 /** Admin only: the operator's HarakaPay wallet balance. */
 export const getHarakaPayBalance = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireSupabaseAuthForPayments])
   .handler(async ({ context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
     if (!isAdmin) throw new Error("Forbidden");
