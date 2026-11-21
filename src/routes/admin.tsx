@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpFromLine, BarChart3, Bell, Clock, Gift, ListOrdered, PanelLeftClose, PanelLeftOpen, Phone, ScrollText, Settings2, Users, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowUpFromLine, BarChart3, Bell, Clock, Cog, Gift, ListOrdered, PanelLeftClose, PanelLeftOpen, Phone, ScrollText, Settings2, Users, Wallet, type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AdminActivity } from "@/components/admin/AdminActivity";
 import { AdminAuditLog } from "@/components/admin/AdminAuditLog";
 import { AdminBets } from "@/components/admin/AdminBets";
 import { AdminDeposits } from "@/components/admin/AdminDeposits";
+import { AdminFormula } from "@/components/admin/AdminFormula";
 import { AdminOddsRules } from "@/components/admin/AdminOddsRules";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminPayments } from "@/components/admin/AdminPayments";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type TabId = "profit" | "deposits" | "withdrawals" | "payments" | "settings" | "odds" | "bets" | "players" | "promo" | "activity" | "audit";
+type TabId = "profit" | "deposits" | "withdrawals" | "payments" | "settings" | "odds" | "formula" | "bets" | "players" | "promo" | "activity" | "audit";
 type TabDef = { id: TabId; label: string; icon: LucideIcon };
 const GROUPS: { label: string; tabs: TabDef[] }[] = [
   { label: "Finance", tabs: [
@@ -44,6 +45,7 @@ const GROUPS: { label: string; tabs: TabDef[] }[] = [
   { label: "Game control", tabs: [
     { id: "settings", label: "Game settings", icon: Settings2 },
     { id: "odds", label: "Time caps", icon: Clock },
+    { id: "formula", label: "Aviator formula", icon: Cog },
     { id: "bets", label: "Bets", icon: ListOrdered },
   ]},
   { label: "Players", tabs: [
@@ -97,10 +99,13 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
   const current = ALL_TABS.find((t) => t.id === tab)!;
 
   return (
-    <div className="flex min-h-screen w-full bg-background text-foreground">
-      <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-card transition-all md:flex ${collapsed ? "w-16" : "w-60"}`}>
-        <div className="flex items-center gap-2.5 border-b border-border px-3 py-3">
-          <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="size-9 shrink-0 rounded-xl" />
+    <div className="relative flex min-h-screen w-full overflow-hidden bg-background text-foreground">
+      <div className="admin-aurora pointer-events-none absolute inset-0 -z-10" />
+      <div className="admin-float pointer-events-none absolute -left-24 top-1/3 -z-10 size-72 rounded-full bg-primary/10 blur-3xl" />
+      <div className="admin-float pointer-events-none absolute -right-24 top-10 -z-10 size-72 rounded-full bg-bet/10 blur-3xl [animation-delay:-3s]" />
+      <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border/60 bg-card/55 backdrop-blur-xl transition-all md:flex ${collapsed ? "w-16" : "w-60"}`}>
+        <div className="flex items-center gap-2.5 border-b border-border/60 px-3 py-3">
+          <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="size-9 shrink-0 rounded-xl ring-1 ring-white/5" />
           {!collapsed && (
             <div className="leading-tight">
               <p className="font-display text-sm font-extrabold">OMUH <span className="text-gold">360</span></p>
@@ -121,7 +126,7 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
                       key={t.id}
                       title={t.label}
                       onClick={() => setTab(t.id)}
-                      className={`relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold transition ${active ? "bg-primary/15 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                      className={`relative flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold transition ${active ? "bg-primary/15 text-foreground shadow-[inset_0_1px_0_oklch(1_0_0/0.05)]" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}
                     >
                       {active && <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-gold" />}
                       <t.icon className={`size-4 shrink-0 ${active ? "text-gold" : ""}`} />
@@ -136,15 +141,15 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
             </div>
           ))}
         </nav>
-        <button onClick={() => setCollapsed(!collapsed)} className="flex items-center justify-center gap-2 border-t border-border py-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
+        <button onClick={() => setCollapsed(!collapsed)} className="flex items-center justify-center gap-2 border-t border-border/60 py-3 text-xs font-semibold text-muted-foreground hover:text-foreground">
           {collapsed ? <PanelLeftOpen className="size-4" /> : <><PanelLeftClose className="size-4" /> Collapse</>}
         </button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-border/60 bg-background/55 backdrop-blur-xl">
           <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
-            <img src="/favicon.png" alt="" className="size-8 rounded-lg md:hidden" />
+            <img src="/favicon.png" alt="" className="size-8 rounded-lg ring-1 ring-white/5 md:hidden" />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Admin</p>
               <h1 className="font-display text-lg font-extrabold leading-tight">{current.label}</h1>
@@ -156,7 +161,7 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
                 </span>
               )}
               {phone && <span className="hidden text-xs text-muted-foreground lg:inline">{formatPhone(phone)}</span>}
-              <Link to="/" className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted">Back to game</Link>
+              <Link to="/" className="admin-glass rounded-xl px-3 py-1.5 text-xs font-bold text-foreground hover:text-primary">Back to game</Link>
             </div>
           </div>
           <nav className="flex gap-1.5 overflow-x-auto px-4 pb-2 md:hidden">
@@ -164,7 +169,7 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold ${tab === t.id ? "bg-primary text-primary-foreground" : "border border-border bg-card text-muted-foreground"}`}
+                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold ${tab === t.id ? "bg-primary text-primary-foreground" : "admin-glass text-muted-foreground"}`}
               >
                 <t.icon className="size-3.5" /> {t.label}
                 {badge(t.id) > 0 && <span className="rounded-full bg-gold px-1.5 text-[10px] text-background">{badge(t.id)}</span>}
@@ -179,6 +184,7 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
           {tab === "payments" && <AdminPayments />}
           {tab === "settings" && <AdminSettings />}
           {tab === "odds" && <AdminOddsRules />}
+          {tab === "formula" && <AdminFormula />}
           {tab === "players" && <AdminPlayers />}
           {tab === "promo" && <AdminPromoCodes />}
           {tab === "bets" && <AdminBets />}
@@ -192,9 +198,10 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
 
 function Gate({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center">
-        <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="mx-auto mb-3 size-14 rounded-2xl" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 text-foreground">
+      <div className="admin-aurora pointer-events-none absolute inset-0" />
+      <div className="admin-glass-strong relative w-full max-w-sm rounded-2xl p-6 text-center">
+        <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="mx-auto mb-3 size-14 rounded-2xl ring-1 ring-white/10" />
         <p className="mb-3 font-display text-lg font-extrabold">OMUH <span className="text-gold">360</span> Admin</p>
         {children}
       </div>

@@ -11,6 +11,15 @@ import {
   validateBet,
 } from "@/lib/aviator";
 
+// Server-authoritative growth rate; fetched from public_get_formula and swapped in.
+let serverGrowthPerMs: number | null = null;
+function growthPerMs(): number {
+  return serverGrowthPerMs ?? 0.00008;
+}
+function multiplierAtServer(elapsedMs: number): number {
+  return Math.exp(growthPerMs() * Math.max(0, elapsedMs));
+}
+
 export type Phase = "waiting" | "flying" | "crashed";
 export type SlotStatus = "none" | "queued" | "active";
 
@@ -126,6 +135,11 @@ export function useAviatorGame(realBalance: number | null = null) {
     g.current.phaseStart = performance.now();
     setHydrated(true);
     render();
+    // Sync the client animation growth rate to the operator's formula setting.
+    void supabase.rpc("public_get_formula").then(({ data }) => {
+      const v = (data as { growth_per_ms?: number } | null)?.growth_per_ms;
+      if (typeof v === "number" && v > 0) serverGrowthPerMs = v;
+    });
   }, [render]);
 
   const recordBet = useCallback((bet: MyBet) => {
@@ -299,7 +313,7 @@ export function useAviatorGame(realBalance: number | null = null) {
           startRealRound();
         }
       } else if (s.phase === "flying") {
-        const m = multiplierAt(elapsed);
+        const m = multiplierAtServer(elapsed);
         if (m >= s.crashPoint && !s.realPending) {
           s.multiplier = s.crashPoint;
           s.phase = "crashed";

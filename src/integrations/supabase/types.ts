@@ -313,6 +313,87 @@ export type Database = {
         }
         Relationships: []
       }
+      aviator_formula: {
+        Row: {
+          id: number
+          growth_per_ms: number
+          instant_crash_prob: number
+          min_crash: number
+          max_crash: number
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          growth_per_ms?: number
+          instant_crash_prob?: number
+          min_crash?: number
+          max_crash?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          growth_per_ms?: number
+          instant_crash_prob?: number
+          min_crash?: number
+          max_crash?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      activity_events: {
+        Row: {
+          id: string
+          user_id: string | null
+          actor_id: string | null
+          event_type: string
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          actor_id?: string | null
+          event_type: string
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          actor_id?: string | null
+          event_type?: string
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
+      admin_audit_log: {
+        Row: {
+          id: string
+          admin_id: string | null
+          target_user_id: string | null
+          action: string
+          details: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          admin_id?: string | null
+          target_user_id?: string | null
+          action: string
+          details?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          admin_id?: string | null
+          target_user_id?: string | null
+          action?: string
+          details?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -384,6 +465,22 @@ export type Database = {
         Args: { _amount: number; _note: string; _user_id: string }
         Returns: number
       }
+      admin_event_summary: { Args: never; Returns: Json }
+      admin_get_formula: { Args: never; Returns: Json }
+      admin_recent_audit: { Args: { _limit: number; _offset: number }; Returns: Json }
+      admin_recent_events: {
+        Args: { _limit: number; _offset: number; _type: string; _user_id: string }
+        Returns: Json
+      }
+      admin_save_formula: {
+        Args: {
+          _growth_per_ms: number
+          _instant_crash_prob: number
+          _min_crash: number
+          _max_crash: number
+        }
+        Returns: Json
+      }
       admin_stats: { Args: { _days: number }; Returns: Json }
       cash_out_real: {
         Args: { _round_id: string; _slot: number }
@@ -398,6 +495,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_admin_action: {
+        Args: { _target: string; _action: string; _details: Json }
+        Returns: undefined
+      }
+      log_event: {
+        Args: { _user_id: string; _actor_id: string; _event_type: string; _metadata: Json }
+        Returns: undefined
+      }
+      log_sign_in: { Args: never; Returns: undefined }
+      public_get_formula: { Args: never; Returns: Json }
       real_round_status: { Args: { _round_id: string }; Returns: Json }
       request_deposit: {
         Args: { _amount: number; _network: string; _phone: string }

@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function Panel({ title, description, children, actions }: { title: string; description?: string; children: ReactNode; actions?: ReactNode }) {
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section className="admin-glass glass-hover rounded-2xl p-4 sm:p-5">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="font-display text-base font-bold text-foreground">{title}</h2>
@@ -27,7 +27,7 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 
 export function StatCard({ label, value, tone }: { label: string; value: string; tone?: "good" | "bad" }) {
   return (
-    <div className="rounded-xl border border-border bg-background p-3">
+    <div className="admin-glass rounded-xl p-3">
       <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
       <p className={`font-display text-lg font-bold tabular-nums ${tone === "good" ? "text-tier-low" : tone === "bad" ? "text-destructive" : "text-foreground"}`}>{value}</p>
     </div>
@@ -44,7 +44,7 @@ export function PrimaryButton({ children, ...props }: React.ButtonHTMLAttributes
 
 export function GhostButton({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button {...props} className={`rounded-xl border border-border bg-background px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted disabled:opacity-60 ${props.className ?? ""}`}>
+    <button {...props} className={`admin-glass rounded-xl px-3 py-1.5 text-xs font-bold text-foreground hover:text-primary disabled:opacity-60 ${props.className ?? ""}`}>
       {children}
     </button>
   );
