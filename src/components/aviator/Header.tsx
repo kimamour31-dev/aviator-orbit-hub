@@ -1,6 +1,5 @@
 import { HelpCircle, LogIn, LogOut, Settings, ShieldCheck } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { formatTsh } from "@/lib/aviator";
 import { DepositDialog } from "./DepositDialog";
@@ -20,7 +19,7 @@ export function Header({ balance, signedIn, userId, phone, isAdmin, onSignOut, o
     <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-3 py-2.5 sm:px-5">
         <div className="flex items-center gap-2.5">
-          <img src={logo.url} alt="OMUH 360 Aviator logo" width={44} height={44} className="size-10 rounded-xl sm:size-11" />
+          <img src="/favicon.png" alt="OMUH 360 Aviator logo" width={44} height={44} className="size-10 rounded-xl sm:size-11" />
           <div className="leading-tight">
             <p className="font-display text-lg font-extrabold tracking-tight text-foreground">
               OMUH <span className="text-gold">360</span>

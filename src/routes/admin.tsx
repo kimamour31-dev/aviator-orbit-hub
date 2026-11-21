@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpFromLine, BarChart3, Bell, Clock, Gift, ListOrdered, PanelLeftClose, PanelLeftOpen, Phone, Settings2, Users, Wallet, type LucideIcon } from "lucide-react";
+import { ArrowUpFromLine, BarChart3, Bell, Clock, Gift, ListOrdered, PanelLeftClose, PanelLeftOpen, Phone, ScrollText, Settings2, Users, Wallet, type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
+import { AdminActivity } from "@/components/admin/AdminActivity";
+import { AdminAuditLog } from "@/components/admin/AdminAuditLog";
 import { AdminBets } from "@/components/admin/AdminBets";
 import { AdminDeposits } from "@/components/admin/AdminDeposits";
 import { AdminOddsRules } from "@/components/admin/AdminOddsRules";
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type TabId = "profit" | "deposits" | "withdrawals" | "payments" | "settings" | "odds" | "bets" | "players" | "promo";
+type TabId = "profit" | "deposits" | "withdrawals" | "payments" | "settings" | "odds" | "bets" | "players" | "promo" | "activity" | "audit";
 type TabDef = { id: TabId; label: string; icon: LucideIcon };
 const GROUPS: { label: string; tabs: TabDef[] }[] = [
   { label: "Finance", tabs: [
@@ -48,6 +49,10 @@ const GROUPS: { label: string; tabs: TabDef[] }[] = [
   { label: "Players", tabs: [
     { id: "players", label: "Players & risk", icon: Users },
     { id: "promo", label: "Promo codes", icon: Gift },
+  ]},
+  { label: "Insights", tabs: [
+    { id: "activity", label: "Activity feed", icon: Bell },
+    { id: "audit", label: "Audit log", icon: ScrollText },
   ]},
 ];
 const ALL_TABS: TabDef[] = GROUPS.flatMap((g) => g.tabs);
@@ -95,7 +100,7 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
     <div className="flex min-h-screen w-full bg-background text-foreground">
       <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-card transition-all md:flex ${collapsed ? "w-16" : "w-60"}`}>
         <div className="flex items-center gap-2.5 border-b border-border px-3 py-3">
-          <img src={logo.url} alt="OMUH 360 Aviator logo" className="size-9 shrink-0 rounded-xl" />
+          <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="size-9 shrink-0 rounded-xl" />
           {!collapsed && (
             <div className="leading-tight">
               <p className="font-display text-sm font-extrabold">OMUH <span className="text-gold">360</span></p>
@@ -139,7 +144,7 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 border-b border-border bg-background/85 backdrop-blur">
           <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
-            <img src={logo.url} alt="" className="size-8 rounded-lg md:hidden" />
+            <img src="/favicon.png" alt="" className="size-8 rounded-lg md:hidden" />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Admin</p>
               <h1 className="font-display text-lg font-extrabold leading-tight">{current.label}</h1>
@@ -177,6 +182,8 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
           {tab === "players" && <AdminPlayers />}
           {tab === "promo" && <AdminPromoCodes />}
           {tab === "bets" && <AdminBets />}
+          {tab === "activity" && <AdminActivity />}
+          {tab === "audit" && <AdminAuditLog />}
         </main>
       </div>
     </div>
@@ -187,7 +194,7 @@ function Gate({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 text-foreground">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center">
-        <img src={logo.url} alt="OMUH 360 Aviator logo" className="mx-auto mb-3 size-14 rounded-2xl" />
+        <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="mx-auto mb-3 size-14 rounded-2xl" />
         <p className="mb-3 font-display text-lg font-extrabold">OMUH <span className="text-gold">360</span> Admin</p>
         {children}
       </div>

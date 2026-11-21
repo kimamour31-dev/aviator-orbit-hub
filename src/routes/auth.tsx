@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import logo from "@/assets/omuh360-aviator-logo.jpeg.asset.json";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizeTzPhone, phoneToAuthEmail } from "@/lib/phone";
 import { normalizePromoCode } from "@/lib/admin-rules";
@@ -65,6 +64,7 @@ function AuthPage() {
       return;
     }
     toast.success(tab === "signup" ? "Account created" : "Welcome back");
+    if (tab === "signin") void supabase.rpc("log_sign_in");
     void navigate({ to: "/" });
   };
 
@@ -72,7 +72,7 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6">
         <Link to="/" className="mb-5 flex items-center gap-2.5">
-          <img src={logo.url} alt="OMUH 360 Aviator logo" className="size-10 rounded-xl" />
+          <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="size-10 rounded-xl" />
           <span className="font-display text-lg font-extrabold text-foreground">
             OMUH <span className="text-gold">360</span>
           </span>
