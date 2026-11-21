@@ -272,6 +272,10 @@ export type Database = {
           id: string
           started_at: string
           user_id: string
+          server_seed: string | null
+          client_seed: string | null
+          seed_hash: string | null
+          nonce: number
         }
         Insert: {
           crash_point: number
@@ -279,6 +283,10 @@ export type Database = {
           id?: string
           started_at?: string
           user_id: string
+          server_seed?: string | null
+          client_seed?: string | null
+          seed_hash?: string | null
+          nonce?: number
         }
         Update: {
           crash_point?: number
@@ -286,6 +294,94 @@ export type Database = {
           id?: string
           started_at?: string
           user_id?: string
+          server_seed?: string | null
+          client_seed?: string | null
+          seed_hash?: string | null
+          nonce?: number
+        }
+        Relationships: []
+      }
+      server_seeds: {
+        Row: {
+          id: string
+          seed: string
+          seed_hash: string
+          status: string
+          created_at: string
+          retired_at: string | null
+        }
+        Insert: {
+          id?: string
+          seed: string
+          seed_hash: string
+          status?: string
+          created_at?: string
+          retired_at?: string | null
+        }
+        Update: {
+          id?: string
+          seed?: string
+          seed_hash?: string
+          status?: string
+          created_at?: string
+          retired_at?: string | null
+        }
+        Relationships: []
+      }
+      fraud_flags: {
+        Row: {
+          id: string
+          user_id: string | null
+          flag_type: string
+          severity: string
+          details: Json
+          resolved: boolean
+          resolved_by: string | null
+          resolved_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          flag_type: string
+          severity?: string
+          details?: Json
+          resolved?: boolean
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          flag_type?: string
+          severity?: string
+          details?: Json
+          resolved?: boolean
+          resolved_by?: string | null
+          resolved_at?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      maintenance: {
+        Row: {
+          id: number
+          enabled: boolean
+          message: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          enabled?: boolean
+          message?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          enabled?: boolean
+          message?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -482,6 +578,15 @@ export type Database = {
         Returns: Json
       }
       admin_stats: { Args: { _days: number }; Returns: Json }
+      admin_telemetry: { Args: never; Returns: Json }
+      admin_financials: { Args: { _days: number }; Returns: Json }
+      admin_ledger: { Args: { _limit: number; _offset: number; _kind: string }; Returns: Json }
+      admin_fraud_flags: { Args: { _resolved: boolean }; Returns: Json }
+      admin_resolve_flag: { Args: { _id: string; _resolved: boolean }; Returns: undefined }
+      admin_set_maintenance: { Args: { _enabled: boolean; _message: string }; Returns: Json }
+      admin_rotate_seed: { Args: never; Returns: Json }
+      public_get_maintenance: { Args: never; Returns: Json }
+      public_active_seed_hash: { Args: never; Returns: Json }
       cash_out_real: {
         Args: { _round_id: string; _slot: number }
         Returns: Json
@@ -532,6 +637,16 @@ export type Database = {
           _auto2: number
           _stake1: number
           _stake2: number
+        }
+        Returns: Json
+      }
+      start_real_round_with_seed: {
+        Args: {
+          _stake1: number
+          _auto1: number
+          _stake2: number
+          _auto2: number
+          _client_seed: string
         }
         Returns: Json
       }
