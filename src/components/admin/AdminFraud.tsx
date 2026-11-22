@@ -26,6 +26,7 @@ const SEVERITY_TONE: Record<string, string> = {
 
 const FLAG_LABELS: Record<string, string> = {
   abnormal_win: "Abnormal win rate",
+  manual_deposit: "Non-HarakaPay deposit",
 };
 
 export function AdminFraud() {

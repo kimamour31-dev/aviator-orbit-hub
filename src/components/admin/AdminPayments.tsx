@@ -59,11 +59,13 @@ export function AdminPayments() {
       r.withdrawal_total += Number(w.amount);
     }
     setAgg(Object.values(map));
+    const approvedDeps = (deps ?? []).filter((d) => d.status === "approved");
+    const approvedWits = (wits ?? []).filter((w) => w.status === "paid");
     setTotals({
-      depTotal: (deps ?? []).reduce((s, d) => s + Number(d.amount), 0),
-      witTotal: (wits ?? []).reduce((s, w) => s + Number(w.amount), 0),
-      depCount: deps?.length ?? 0,
-      witCount: wits?.length ?? 0,
+      depTotal: approvedDeps.reduce((s, d) => s + Number(d.amount), 0),
+      witTotal: approvedWits.reduce((s, w) => s + Number(w.amount), 0),
+      depCount: approvedDeps.length,
+      witCount: approvedWits.length,
       pendingDep: (deps ?? []).filter((d) => d.status === "pending").length,
       pendingWit: (wits ?? []).filter((w) => w.status === "pending").length,
     });
@@ -104,8 +106,8 @@ export function AdminPayments() {
         }
       >
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <StatCard label="Deposits (all)" value={totals ? formatTsh(totals.depTotal) : "…"} tone="good" />
-          <StatCard label="Withdrawals (all)" value={totals ? formatTsh(totals.witTotal) : "…"} tone="bad" />
+          <StatCard label="Deposits (approved)" value={totals ? formatTsh(totals.depTotal) : "…"} tone="good" />
+          <StatCard label="Withdrawals (paid)" value={totals ? formatTsh(totals.witTotal) : "…"} tone="bad" />
           <StatCard label="Pending deposits" value={String(totals?.pendingDep ?? "…")} />
           <StatCard label="Pending withdrawals" value={String(totals?.pendingWit ?? "…")} />
         </div>
