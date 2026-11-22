@@ -42,12 +42,31 @@ export function AdminPayments() {
   }, []);
 
   const loadAgg = async () => {
-    const [{ data: deps }, { data: wits }, { data: econData }] = await Promise.all([
-      supabase.from("deposit_requests").select("network, amount, status"),
+    const [depsRes, witsRes, econRes] = await Promise.all([
+      supabase.from("deposit_requests").select("network, amount, status, provider, provider_fee"),
       supabase.from("withdrawal_requests").select("network, amount, status"),
       supabase.rpc("admin_deposit_economics"),
     ]);
-    if (econData) setEcon(econData as { total_completed: number; total_fees: number; net_profit: number; completed_count: number; harakapay_count: number });
+    const deps = depsRes.data;
+    const wits = witsRes.data;
+
+    if (econRes.data) {
+      setEcon(econRes.data as { total_completed: number; total_fees: number; net_profit: number; completed_count: number; harakapay_count: number });
+    } else if (deps) {
+      const approved = deps.filter((d) => d.status === "approved");
+      const totalCompleted = approved.reduce((s, d) => s + Number(d.amount), 0);
+      const totalFees = approved
+        .filter((d) => d.provider === "harakapay")
+        .reduce((s, d) => s + Number(d.provider_fee ?? 0), 0);
+      setEcon({
+        total_completed: totalCompleted,
+        total_fees: totalFees,
+        net_profit: totalCompleted - totalFees,
+        completed_count: approved.length,
+        harakapay_count: approved.filter((d) => d.provider === "harakapay").length,
+      });
+    }
+
     const map: Record<string, NetworkAgg> = {};
     for (const n of NETWORKS) map[n.id] = { network: n.id, deposit_count: 0, deposit_total: 0, withdrawal_count: 0, withdrawal_total: 0, pending: 0 };
     for (const d of deps ?? []) {
