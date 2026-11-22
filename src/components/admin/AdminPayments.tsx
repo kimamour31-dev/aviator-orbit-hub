@@ -1,4 +1,4 @@
-import { Activity, ArrowDownToLine, ArrowUpFromLine, RefreshCw, Smartphone, Wallet } from "lucide-react";
+import { Activity, ArrowDownToLine, ArrowUpFromLine, RefreshCw, Smartphone, TrendingUp, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getHarakaPayBalance } from "@/lib/harakapay.functions";
@@ -24,6 +24,7 @@ export function AdminPayments() {
   const [haraka, setHaraka] = useState<{ wallet: number; float: number } | string | null>(null);
   const [agg, setAgg] = useState<NetworkAgg[]>([]);
   const [totals, setTotals] = useState<{ depTotal: number; witTotal: number; depCount: number; witCount: number; pendingDep: number; pendingWit: number } | null>(null);
+  const [econ, setEcon] = useState<{ total_completed: number; total_fees: number; net_profit: number; completed_count: number; harakapay_count: number } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const refreshHaraka = () => {
@@ -41,10 +42,12 @@ export function AdminPayments() {
   }, []);
 
   const loadAgg = async () => {
-    const [{ data: deps }, { data: wits }] = await Promise.all([
+    const [{ data: deps }, { data: wits }, { data: econData }] = await Promise.all([
       supabase.from("deposit_requests").select("network, amount, status"),
       supabase.from("withdrawal_requests").select("network, amount, status"),
+      supabase.rpc("admin_deposit_economics"),
     ]);
+    if (econData) setEcon(econData as { total_completed: number; total_fees: number; net_profit: number; completed_count: number; harakapay_count: number });
     const map: Record<string, NetworkAgg> = {};
     for (const n of NETWORKS) map[n.id] = { network: n.id, deposit_count: 0, deposit_total: 0, withdrawal_count: 0, withdrawal_total: 0, pending: 0 };
     for (const d of deps ?? []) {
@@ -111,6 +114,25 @@ export function AdminPayments() {
           <StatCard label="Pending deposits" value={String(totals?.pendingDep ?? "…")} />
           <StatCard label="Pending withdrawals" value={String(totals?.pendingWit ?? "…")} />
         </div>
+      </Panel>
+
+      <Panel
+        title="Deposit economics"
+        description="Your real revenue after HarakaPay processing fees are deducted from completed deposits."
+      >
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <StatCard label="Completed deposits" value={econ ? formatTsh(econ.total_completed) : "…"} tone="good" />
+          <StatCard label="HarakaPay fees" value={econ ? formatTsh(econ.total_fees) : "…"} tone="bad" />
+          <StatCard label="Net profit after fees" value={econ ? formatTsh(econ.net_profit) : "…"} tone="good" />
+        </div>
+        {econ && (
+          <div className="mt-3 flex items-center gap-2 rounded-xl border border-tier-low/30 bg-tier-low/10 px-3 py-2">
+            <TrendingUp className="size-4 text-tier-low" />
+            <span className="text-xs font-semibold text-tier-low">
+              {econ.harakapay_count} of {econ.completed_count} deposits processed via HarakaPay
+            </span>
+          </div>
+        )}
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
