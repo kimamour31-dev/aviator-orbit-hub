@@ -137,7 +137,7 @@ export function AdminPayments() {
 
       <Panel
         title="Deposit economics"
-        description="Your real revenue after HarakaPay processing fees are deducted from completed deposits."
+        description="Total revenue from player deposits minus HarakaPay processing fees. This is not your wallet balance — money leaves your wallet when you pay out withdrawals or transfer funds out."
       >
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <StatCard label="Completed deposits" value={econ ? formatTsh(econ.total_completed) : "…"} tone="good" />
@@ -152,6 +152,11 @@ export function AdminPayments() {
             </span>
           </div>
         )}
+        <div className="mt-2 rounded-xl bg-muted/50 px-3 py-2">
+          <p className="text-xs text-muted-foreground">
+            Net profit = total deposits received minus fees. Your HarakaPay wallet balance is separate — it reflects what is left after payouts, transfers, and other spending from the wallet.
+          </p>
+        </div>
       </Panel>
 
       <div className="grid gap-4 lg:grid-cols-2">
