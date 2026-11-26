@@ -10,13 +10,13 @@ const tierClass = {
 
 export function HistoryStrip({ history }: { history: number[] }) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl border border-border bg-card px-3 py-2">
+    <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
       <div className="flex flex-1 gap-1.5 overflow-hidden">
         {history.map((m, i) => (
           <span
             key={`${i}-${m}`}
             className={cn(
-              "shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-bold tabular-nums",
+              "shrink-0 rounded-md border px-2.5 py-0.5 text-xs font-bold tabular-nums",
               tierClass[tierOf(m)],
               i === 0 && "animate-in fade-in zoom-in-75",
             )}

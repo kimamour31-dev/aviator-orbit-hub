@@ -15,7 +15,7 @@ export function BetsPanel({ phase, simBets, myBets, topWins }: Props) {
   const total = simBets.reduce((a, b) => a + b.stake, 0);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card">
       <div className="grid grid-cols-3 border-b border-border text-xs font-semibold">
         {(
           [

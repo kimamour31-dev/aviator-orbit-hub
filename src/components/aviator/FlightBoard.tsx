@@ -43,12 +43,12 @@ export function FlightBoard({ phase, elapsed, multiplier, round }: Props) {
   const yTicks = Array.from({ length: 5 }, (_, i) => 1 + ((mMax - 1) * (i + 1)) / 5);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-card">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2.5 text-xs">
-        <span className="rounded-full border border-border bg-muted px-2.5 py-1 font-medium text-muted-foreground">
+        <span className="rounded-md border border-border bg-muted px-2.5 py-1 font-medium text-muted-foreground">
           Round <span className="font-mono text-foreground">#{String(round).padStart(5, "0")}</span>
         </span>
-        <span className="rounded-full bg-secondary px-2.5 py-1 font-medium text-muted-foreground">
+        <span className="rounded-md bg-primary/15 px-2.5 py-1 font-extrabold uppercase tracking-wide text-primary">
           Real mode
         </span>
       </div>
@@ -115,7 +115,7 @@ export function FlightBoard({ phase, elapsed, multiplier, round }: Props) {
                 height={640}
                 className="plane-idle w-40 drop-shadow-[0_8px_18px_var(--primary-glow)] sm:w-56"
               />
-              <p className="font-display text-lg font-bold uppercase tracking-[0.2em] text-foreground sm:text-xl">
+              <p className="font-display text-lg font-extrabold uppercase tracking-[0.15em] text-foreground sm:text-xl">
                 Waiting for next round
               </p>
               <div className="h-1.5 w-56 overflow-hidden rounded-full bg-muted">
@@ -132,15 +132,15 @@ export function FlightBoard({ phase, elapsed, multiplier, round }: Props) {
               <p className="font-display text-6xl font-extrabold tabular-nums text-foreground sm:text-8xl">
                 {formatMult(multiplier)}
               </p>
-              <span className="rounded-full border border-primary/60 bg-primary/10 px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <span className="rounded-md bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-[0.15em] text-primary-foreground">
                 Plane in flight
               </span>
             </>
           )}
           {phase === "crashed" && (
             <>
-              <p className="font-display text-xl font-bold uppercase tracking-[0.25em] text-primary">Flew away!</p>
-              <p className="font-display text-6xl font-extrabold tabular-nums text-primary sm:text-8xl">
+              <p className="font-display text-xl font-extrabold uppercase tracking-[0.2em] text-destructive">Flew away!</p>
+              <p className="font-display text-6xl font-extrabold tabular-nums text-destructive sm:text-8xl">
                 {formatMult(multiplier)}
               </p>
               <div className="h-1 w-40 overflow-hidden rounded-full bg-muted">

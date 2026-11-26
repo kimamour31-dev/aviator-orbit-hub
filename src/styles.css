@@ -12,21 +12,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Design system definition.
- *
- * The design lives in this file: oklch color tokens on the shadcn variables
- * (--background, --foreground, --primary, --secondary, --muted, --accent, ...) plus
- * new tokens as needed, font tokens, and custom styles and animations.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ * Design system — Meridianbet-style sportsbook aesthetic.
+ * Dark navy background, yellow/gold primary, green for bet actions,
+ * clean card-based layout with professional betting-site feel.
  */
 
 @theme inline {
@@ -75,8 +63,8 @@
   --color-tigo: var(--tigo);
   --color-airtel: var(--airtel);
   --color-halopesa: var(--halopesa);
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -88,29 +76,32 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.14 0.012 20);
-  --foreground: oklch(0.97 0.005 20);
-  --card: oklch(0.185 0.016 20);
-  --card-foreground: oklch(0.97 0.005 20);
-  --popover: oklch(0.2 0.016 20);
-  --popover-foreground: oklch(0.97 0.005 20);
-  --primary: oklch(0.6 0.235 26);
-  --primary-glow: oklch(0.6 0.235 26 / 0.45);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.24 0.02 20);
-  --secondary-foreground: oklch(0.97 0.005 20);
-  --muted: oklch(0.245 0.018 20);
-  --muted-foreground: oklch(0.7 0.02 20);
-  --accent: oklch(0.26 0.03 20);
-  --accent-foreground: oklch(0.97 0.005 20);
-  --destructive: oklch(0.55 0.21 22);
+  --radius: 0.5rem;
+  /* Dark navy background — Meridianbet style */
+  --background: oklch(0.16 0.02 260);
+  --foreground: oklch(0.96 0.005 60);
+  --card: oklch(0.2 0.025 260);
+  --card-foreground: oklch(0.96 0.005 60);
+  --popover: oklch(0.22 0.025 260);
+  --popover-foreground: oklch(0.96 0.005 60);
+  /* Yellow/gold primary — Meridianbet signature color */
+  --primary: oklch(0.82 0.18 85);
+  --primary-glow: oklch(0.82 0.18 85 / 0.4);
+  --primary-foreground: oklch(0.16 0.02 260);
+  --secondary: oklch(0.25 0.02 260);
+  --secondary-foreground: oklch(0.96 0.005 60);
+  --muted: oklch(0.24 0.02 260);
+  --muted-foreground: oklch(0.68 0.02 260);
+  --accent: oklch(0.27 0.025 260);
+  --accent-foreground: oklch(0.96 0.005 60);
+  --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.28 0.02 20);
-  --input: oklch(0.28 0.02 20);
-  --ring: oklch(0.6 0.235 26);
-  --gold: oklch(0.82 0.16 85);
-  --bet: oklch(0.64 0.17 150);
+  --border: oklch(0.29 0.02 260);
+  --input: oklch(0.29 0.02 260);
+  --ring: oklch(0.82 0.18 85);
+  --gold: oklch(0.82 0.18 85);
+  /* Green for bet actions — Meridianbet uses green for positive betting actions */
+  --bet: oklch(0.62 0.19 145);
   --bet-foreground: oklch(0.99 0 0);
   --cashout: oklch(0.78 0.16 70);
   --cashout-foreground: oklch(0.2 0.03 60);
@@ -122,19 +113,19 @@
   --tigo: oklch(0.6 0.15 250);
   --airtel: oklch(0.6 0.23 27);
   --halopesa: oklch(0.72 0.18 55);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.185 0.016 20);
-  --sidebar-foreground: oklch(0.97 0.005 20);
-  --sidebar-primary: oklch(0.6 0.235 26);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.26 0.03 20);
-  --sidebar-accent-foreground: oklch(0.97 0.005 20);
-  --sidebar-border: oklch(0.28 0.02 20);
-  --sidebar-ring: oklch(0.6 0.235 26);
+  --chart-1: oklch(0.82 0.18 85);
+  --chart-2: oklch(0.62 0.19 145);
+  --chart-3: oklch(0.55 0.22 25);
+  --chart-4: oklch(0.72 0.13 235);
+  --chart-5: oklch(0.78 0.16 70);
+  --sidebar: oklch(0.18 0.02 260);
+  --sidebar-foreground: oklch(0.96 0.005 60);
+  --sidebar-primary: oklch(0.82 0.18 85);
+  --sidebar-primary-foreground: oklch(0.16 0.02 260);
+  --sidebar-accent: oklch(0.25 0.02 260);
+  --sidebar-accent-foreground: oklch(0.96 0.005 60);
+  --sidebar-border: oklch(0.29 0.02 260);
+  --sidebar-ring: oklch(0.82 0.18 85);
 }
 
 @layer base {
@@ -145,6 +136,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
   }
 }
 
@@ -156,7 +148,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   transition: filter 150ms ease;
   box-shadow: inset 0 -3px 0 oklch(0 0 0 / 0.25);
 }
@@ -164,7 +156,7 @@
 @utility sky-rays {
   background:
     radial-gradient(ellipse at 0% 100%, var(--primary-glow), transparent 55%),
-    repeating-conic-gradient(from 0deg at 0% 100%, oklch(1 0 0 / 0.025) 0deg 6deg, transparent 6deg 12deg);
+    repeating-conic-gradient(from 0deg at 0% 100%, oklch(1 0 0 / 0.02) 0deg 6deg, transparent 6deg 12deg);
 }
 
 @utility plane-away {
@@ -189,7 +181,7 @@
 
 @utility auth-input {
   width: 100%;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--border);
   background: var(--background);
   padding: 0.6rem 0.8rem;
@@ -234,9 +226,9 @@
 
 @utility admin-aurora {
   background:
-    radial-gradient(ellipse 60% 50% at 15% 0%, oklch(0.6 0.235 26 / 0.12), transparent 60%),
-    radial-gradient(ellipse 50% 40% at 85% 10%, oklch(0.64 0.17 150 / 0.1), transparent 60%),
-    radial-gradient(ellipse 70% 60% at 50% 100%, oklch(0.82 0.16 85 / 0.08), transparent 65%);
+    radial-gradient(ellipse 60% 50% at 15% 0%, oklch(0.82 0.18 85 / 0.1), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 10%, oklch(0.62 0.19 145 / 0.08), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 100%, oklch(0.82 0.18 85 / 0.06), transparent 65%);
 }
 
 @utility glass-hover {

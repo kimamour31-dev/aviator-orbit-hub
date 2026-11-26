@@ -52,28 +52,28 @@ export function BetConsole({ index, slot, phase, multiplier, onPlace, onCancel, 
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex rounded-full bg-muted p-0.5 text-xs font-semibold">
+        <div className="flex rounded-md bg-muted p-0.5 text-xs font-semibold">
           {(["bet", "auto"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
               className={cn(
-                "rounded-full px-4 py-1 capitalize transition-colors",
+                "rounded-md px-4 py-1 capitalize transition-colors",
                 tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-              )}
+              )}}
             >
               {t}
             </button>
           ))}
         </div>
-        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Bet console #{index + 1}</span>
+        <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground">Bet #{index + 1}</span>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-1 rounded-xl border border-border bg-background p-1">
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-background p-1">
             <button
               aria-label="Decrease bet"
               disabled={locked}
