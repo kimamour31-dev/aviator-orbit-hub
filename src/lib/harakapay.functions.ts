@@ -35,7 +35,7 @@ export const startHarakaPayDeposit = createServerFn({ method: "POST" })
       const res = await collect({
         phone: toHarakaPayPhone(check.phone),
         amount: check.amount,
-        description: "OMUH 360 deposit",
+        description: "Omuh bet deposit",
         ...(webhookUrl() ? { webhook_url: webhookUrl() } : {}),
       });
       if (!res.success || !res.order_id) throw new Error(res.error ?? res.message ?? "HarakaPay did not accept the payment");

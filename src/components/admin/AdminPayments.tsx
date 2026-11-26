@@ -234,7 +234,7 @@ export function AdminPayments() {
         <div className="grid gap-3 sm:grid-cols-2">
           {NETWORKS.map((n) => (
             <Field key={n.id} label={n.label} hint="Leave empty to hide">
-              <input className="auth-input" placeholder="e.g. Lipa Namba 123456 — OMUH 360" value={nums[n.id] ?? ""} onChange={(e) => setNums({ ...nums, [n.id]: e.target.value })} maxLength={80} />
+              <input className="auth-input" placeholder="e.g. Lipa Namba 123456 — Omuh bet" value={nums[n.id] ?? ""} onChange={(e) => setNums({ ...nums, [n.id]: e.target.value })} maxLength={80} />
             </Field>
           ))}
         </div>

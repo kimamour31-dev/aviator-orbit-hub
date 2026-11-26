@@ -62,7 +62,7 @@ export function BetConsole({ index, slot, phase, multiplier, onPlace, onCancel, 
               className={cn(
                 "rounded-md px-4 py-1 capitalize transition-colors",
                 tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-              )}}
+              )}
             >
               {t}
             </button>

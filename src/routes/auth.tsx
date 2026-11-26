@@ -8,9 +8,9 @@ import { normalizePromoCode } from "@/lib/admin-rules";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — OMUH 360 Aviator" },
-      { name: "description", content: "Sign in or create your OMUH 360 Aviator account with your phone number and password." },
-      { property: "og:title", content: "Sign in — OMUH 360 Aviator" },
+      { title: "Sign in — Omuh bet Aviator" },
+      { name: "description", content: "Sign in or create your Omuh bet account with your phone number and password." },
+      { property: "og:title", content: "Sign in — Omuh bet Aviator" },
       { property: "og:description", content: "Create an account with your phone number to play Aviator." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -70,19 +70,19 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6">
         <Link to="/" className="mb-5 flex items-center gap-2.5">
-          <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="size-10 rounded-xl" />
-          <span className="font-display text-lg font-extrabold text-foreground">
-            OMUH <span className="text-gold">360</span>
+          <img src="/favicon.png" alt="Omuh bet logo" className="size-10 rounded-lg" />
+          <span className="font-display text-lg font-extrabold uppercase tracking-tight text-foreground">
+            Omuh<span className="text-primary"> bet</span>
           </span>
         </Link>
-        <div className="mb-5 flex rounded-full bg-muted p-0.5 text-sm font-semibold">
+        <div className="mb-5 flex rounded-lg bg-muted p-0.5 text-sm font-semibold">
           {(["signin", "signup"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`flex-1 rounded-full py-1.5 ${tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+              className={`flex-1 rounded-md py-1.5 ${tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
             >
               {t === "signin" ? "Sign in" : "Register"}
             </button>
@@ -112,7 +112,7 @@ function AuthPage() {
               />
             </Field>
           )}
-          <button disabled={busy} className="w-full rounded-xl bg-bet py-2.5 font-bold text-bet-foreground hover:brightness-110 disabled:opacity-60">
+          <button disabled={busy} className="w-full rounded-lg bg-bet py-2.5 font-extrabold uppercase tracking-wide text-bet-foreground hover:brightness-110 disabled:opacity-60">
             {busy ? "Please wait…" : tab === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>

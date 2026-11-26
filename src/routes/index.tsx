@@ -11,13 +11,13 @@ import { Landing } from "@/components/aviator/Landing";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OMUH 360 Aviator — Crash Game" },
+      { title: "Omuh bet — Aviator Crash Game" },
       {
         name: "description",
         content:
-          "Play the OMUH 360 Aviator crash game: bet, watch the plane climb and cash out before it flies away.",
+          "Play the Omuh bet Aviator crash game: bet, watch the plane climb and cash out before it flies away.",
       },
-      { property: "og:title", content: "OMUH 360 Aviator — Crash Game" },
+      { property: "og:title", content: "Omuh bet — Aviator Crash Game" },
       {
         property: "og:description",
         content:

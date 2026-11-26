@@ -21,10 +21,10 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Admin — OMUH 360 Aviator" },
-      { name: "description", content: "Operator dashboard for OMUH 360 Aviator." },
-      { property: "og:title", content: "Admin — OMUH 360 Aviator" },
-      { property: "og:description", content: "Operator dashboard for OMUH 360 Aviator." },
+      { title: "Admin — Omuh bet Aviator" },
+      { name: "description", content: "Operator dashboard for Omuh bet Aviator." },
+      { property: "og:title", content: "Admin — Omuh bet Aviator" },
+      { property: "og:description", content: "Operator dashboard for Omuh bet Aviator." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -105,10 +105,10 @@ function Dashboard({ tab, setTab, phone }: { tab: TabId; setTab: (t: TabId) => v
       <div className="admin-float pointer-events-none absolute -right-24 top-10 -z-10 size-72 rounded-full bg-bet/10 blur-3xl [animation-delay:-3s]" />
       <aside className={`sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border/60 bg-card/55 backdrop-blur-xl transition-all md:flex ${collapsed ? "w-16" : "w-60"}`}>
         <div className="flex items-center gap-2.5 border-b border-border/60 px-3 py-3">
-          <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="size-9 shrink-0 rounded-xl ring-1 ring-white/5" />
+          <img src="/favicon.png" alt="Omuh bet logo" className="size-9 shrink-0 rounded-lg ring-1 ring-white/5" />
           {!collapsed && (
             <div className="leading-tight">
-              <p className="font-display text-sm font-extrabold">OMUH <span className="text-gold">360</span></p>
+              <p className="font-display text-sm font-extrabold uppercase tracking-tight">Omuh<span className="text-gold"> bet</span></p>
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Operator</p>
             </div>
           )}
@@ -201,8 +201,8 @@ function Gate({ children }: { children: React.ReactNode }) {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 text-foreground">
       <div className="admin-aurora pointer-events-none absolute inset-0" />
       <div className="admin-glass-strong relative w-full max-w-sm rounded-2xl p-6 text-center">
-        <img src="/favicon.png" alt="OMUH 360 Aviator logo" className="mx-auto mb-3 size-14 rounded-2xl ring-1 ring-white/10" />
-        <p className="mb-3 font-display text-lg font-extrabold">OMUH <span className="text-gold">360</span> Admin</p>
+        <img src="/favicon.png" alt="Omuh bet logo" className="mx-auto mb-3 size-14 rounded-lg ring-1 ring-white/10" />
+        <p className="mb-3 font-display text-lg font-extrabold uppercase tracking-tight">Omuh<span className="text-gold"> bet</span> Admin</p>
         {children}
       </div>
     </div>
